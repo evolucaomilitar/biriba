@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Simulador de Bordados - Evolução Militar</title>
-  <meta name="description" content="Personalize sua biriba oficial, divisa de série e divisa de turno do Colégio Militar e encomende pelo WhatsApp.">
+  <title>Simulador & Produção de Bordados CPM - Evolução Militar</title>
+  <meta name="description" content="Simulador de Biribas, Divisas de Série e Turno do Colégio Militar com Painel de Controle de Produção e Relatórios.">
   <meta name="theme-color" content="#0b0f0c">
   
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.svg">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Bordados CPM">
@@ -15,7 +17,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Oswald:wght@700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Oswald:wght@600;700;900&display=swap" rel="stylesheet">
   
   <style>
     :root {
@@ -84,483 +86,1239 @@
         -0.5px -0.5px 0px rgba(255, 255, 255, 0.7);
       filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.35));
     }
+
+    /* Animações e Estilos da Produção */
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.92; transform: scale(1.02); }
+    }
+    .btn-pronto-pulse {
+      animation: pulse-subtle 2s infinite ease-in-out;
+    }
   </style>
 </head>
-<body class="bg-[#0b0f0c] text-gray-100 min-h-screen flex items-center justify-center p-3 sm:p-5 font-sans select-none">
+<body class="bg-[#0b0f0c] text-gray-100 min-h-screen flex flex-col items-center justify-start p-2 sm:p-5 font-sans select-none">
 
-  <div class="max-w-md w-full bg-[#131a15] border border-[#2a382c] rounded-2xl shadow-2xl overflow-hidden mx-auto my-3 sm:my-6">
+  <!-- AVISO TOAST FLUTUANTE -->
+  <div id="toastNotification" class="fixed top-4 right-4 z-50 transform transition-all duration-300 translate-y-[-100px] opacity-0 pointer-events-none bg-[#131d16] border border-[#344d37] text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 max-w-sm">
+    <span id="toastIcon" class="text-lg">✅</span>
+    <span id="toastText" class="text-xs font-semibold leading-tight">Aviso do sistema</span>
+  </div>
+
+  <!-- CONTAINER PRINCIPAL DO APLICATIVO -->
+  <div id="mainAppContainer" class="max-w-md w-full bg-[#131a15] border border-[#2a382c] rounded-2xl shadow-2xl overflow-hidden mx-auto my-2 sm:my-4 transition-all duration-300">
     
-    <!-- Cabeçalho Oficial EVOLUÇÃO MILITAR -->
-    <div class="bg-[#0c120e] border-b border-[#2a382c] px-5 py-4 flex items-center justify-between">
-      <div>
-        <div class="text-lg sm:text-xl font-black tracking-widest text-[#f0c20a] uppercase leading-none font-sans drop-shadow-sm">
-          EVOLUÇÃO MILITAR
-        </div>
-        <div class="text-[10px] text-gray-400 font-mono tracking-wider mt-1 uppercase">
-          Artigos Militares & Bordados CPM
-        </div>
-      </div>
-
-      <div class="text-right">
-        <span class="text-[10px] text-gray-400 font-mono uppercase block">Tabela CPM</span>
-        <div class="text-xs font-bold text-white flex items-center gap-1 justify-end">
-          <span class="text-lime-400">Biriba R$20</span>
-          <span class="text-gray-500">•</span>
-          <span class="text-amber-400">Série R$10</span>
-          <span class="text-gray-500">•</span>
-          <span class="text-cyan-400">Turno R$10</span>
-        </div>
+    <!-- CABEÇALHO OFICIAL EVOLUÇÃO MILITAR (EM UMA LINHA, SEM VALORES) -->
+    <div class="bg-[#0c120e] border-b border-[#2a382c] px-4 py-3.5 flex items-center justify-center text-center">
+      <div class="text-xl sm:text-2xl font-black tracking-widest text-[#f0c20a] uppercase leading-none font-sans drop-shadow-sm">
+        EVOLUÇÃO MILITAR
       </div>
     </div>
 
-    <!-- Faixa Sub-cabeçalho Promocional -->
-    <div class="bg-gradient-to-r from-[#172419] to-[#101b12] px-5 py-3 border-b border-[#2a382c]">
-      <div class="flex items-center justify-between">
-        <span class="px-2.5 py-0.5 bg-[#233827] text-[#86efac] border border-[#3b593f] rounded-full text-[11px] font-bold uppercase tracking-wider">
-          Kit Oficial • Colégio Militar
-        </span>
-        <span class="text-[11px] font-mono text-gray-400">Biriba, Série e Turno</span>
-      </div>
-      <h1 class="text-sm sm:text-base font-extrabold text-white mt-1 leading-tight">
-        MONTE SEU ENXOVAL DE BORDADOS
-      </h1>
-    </div>
+    <!-- ================================================================ -->
+    <!--                  ABA 1: SIMULADOR DO CLIENTE                    -->
+    <!-- ================================================================ -->
+    <div id="viewSimulador" class="space-y-0">
+      <div class="p-4 sm:p-5 space-y-5">
 
-    <div class="p-5 space-y-5">
+        <!-- ==================== SEÇÃO 1: BIRIBA ==================== -->
+        <div class="space-y-3.5">
+          <div class="flex items-center justify-between border-b border-[#2a382c] pb-2 gap-2">
+            <span class="text-xs sm:text-sm font-black text-white uppercase tracking-wider flex items-center gap-1.5 min-w-0">
+              <span class="w-2.5 h-2.5 rounded-full bg-lime-400 flex-shrink-0"></span>
+              <span class="truncate">1. BIRIBA DE IDENTIFICAÇÃO (12 × 2,5 cm)</span>
+            </span>
+            <span class="inline-flex items-baseline gap-1 flex-shrink-0 whitespace-nowrap text-[#f0c20a] drop-shadow-[0_2px_12px_rgba(240,194,10,0.5)] select-none">
+              <span class="text-xs sm:text-sm font-bold opacity-85 font-mono">R$</span>
+              <span class="text-xl sm:text-2xl font-black font-mono tracking-tight leading-none">20,00</span>
+            </span>
+          </div>
 
-      <!-- ==================== SEÇÃO 1: BIRIBA ==================== -->
-      <div class="space-y-3.5">
-        <div class="flex items-center justify-between border-b border-[#2a382c] pb-1.5">
-          <span class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-lime-400"></span>
-            1. BIRIBA DE IDENTIFICAÇÃO (12 × 2,5 cm)
-          </span>
-          <span class="text-[11px] font-bold text-lime-400 font-mono">R$ 20,00</span>
-        </div>
+          <!-- Seleção de Modelo (Agasalho vs Farda) -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wide mb-1.5">
+              Visualizar Modelo na Prévia:
+            </label>
+            <div class="grid grid-cols-2 gap-2">
+              <button 
+                id="btn-mod-agasalho"
+                type="button" 
+                onclick="setModelo('AGASALHO')" 
+                class="py-2 px-2 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-0.5 text-center bg-[#233827] border-[#4d7c0f] text-[#86efac] shadow-md cursor-pointer"
+              >
+                <span>🧥 AGASALHO</span>
+                <span class="text-[10px] font-normal opacity-90">Branca c/ Azul</span>
+              </button>
+              <button 
+                id="btn-mod-farda"
+                type="button" 
+                onclick="setModelo('FARDA')" 
+                class="py-2 px-2 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-0.5 text-center bg-[#1c261e] border-[#334636] text-gray-300 hover:bg-[#233026] cursor-pointer"
+              >
+                <span>👔 FARDA</span>
+                <span class="text-[10px] font-normal opacity-90">Cinza c/ Amarelo</span>
+              </button>
+            </div>
+          </div>
 
-        <!-- 1.1 Alternar visualização da Biriba -->
-        <div>
-          <label class="block text-[11px] font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
-            Modelo para visualização:
-          </label>
-          <div class="grid grid-cols-2 gap-2">
-            <button 
-              type="button" 
-              onclick="setModelo('AGASALHO')" 
-              id="btn-mod-agasalho" 
-              class="py-2 px-2 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-0.5 text-center bg-[#233827] border-[#4d7c0f] text-[#86efac] shadow-md"
+          <!-- Seleção de Posto: Aluna vs Aluno -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wide mb-1.5">
+              Identificação do Estudante:
+            </label>
+            <div class="grid grid-cols-2 gap-2">
+              <button 
+                type="button" 
+                id="btn-aluna" 
+                onclick="setPosto('ALUNA')" 
+                class="posto-btn py-2 px-3 rounded-xl text-xs font-bold bg-[#233827] border border-[#4d7c0f] text-[#86efac] transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                👧 ALUNA
+              </button>
+              <button 
+                type="button" 
+                id="btn-aluno" 
+                onclick="setPosto('ALUNO')" 
+                class="posto-btn py-2 px-3 rounded-xl text-xs font-bold bg-[#1c261e] border border-[#334636] text-gray-300 transition-all hover:bg-[#233026] cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                👦 ALUNO
+              </button>
+            </div>
+          </div>
+
+          <!-- Campo de Digitação do Sobrenome -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wide mb-1">
+              Sobrenome a ser Bordado:
+            </label>
+            <div class="relative">
+              <input 
+                type="text" 
+                id="inputNome" 
+                value="MONIQUE" 
+                maxlength="16" 
+                placeholder="DIGITE O SOBRENOME"
+                class="w-full bg-[#162018] border border-[#334636] rounded-xl px-4 py-2.5 text-white font-extrabold text-sm uppercase tracking-wider focus:outline-none focus:border-lime-500 focus:ring-1 focus:ring-lime-500 transition-all font-sans"
+                oninput="renderAll()"
+              >
+              <span class="absolute right-3 top-2.5 text-[10px] text-gray-500 font-mono">Ponto Cheio</span>
+            </div>
+          </div>
+
+          <!-- Preview da Biriba em Alta Definição -->
+          <div class="bg-[#080b09] p-3.5 rounded-xl border border-[#232e25] flex flex-col items-center">
+            <div class="w-full flex justify-between items-center mb-2 text-[10px] font-mono text-gray-400">
+              <span id="badgeModelo" class="text-lime-400 font-semibold uppercase">PRÉVIA: AGASALHO</span>
+              <span>12,0 × 2,5 CM</span>
+            </div>
+
+            <!-- Moldura da Biriba -->
+            <div 
+              id="biribaContainer" 
+              class="w-[360px] h-[80px] max-w-full fabric-agasalho biriba-frame rounded-sm flex flex-col items-center justify-center relative select-none shadow-2xl transition-all"
             >
-              <div class="flex items-center gap-1.5">
-                <span class="w-3 h-3 rounded-full bg-[#132c8c] border border-white/60"></span>
-                <span class="text-xs font-extrabold">🧥 AGASALHO</span>
-              </div>
-              <span class="text-[10px] text-gray-300 font-normal">Branca c/ Azul</span>
-            </button>
+              <!-- Pesponto interno -->
+              <div 
+                id="innerStitch" 
+                class="absolute inset-[3px] border border-dashed border-[#132c8c]/25 pointer-events-none rounded-[1px] transition-all"
+              ></div>
 
-            <button 
-              type="button" 
-              onclick="setModelo('FARDA')" 
-              id="btn-mod-farda" 
-              class="py-2 px-2 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-0.5 text-center bg-[#1c261e] border-[#334636] text-gray-300 hover:bg-[#233026]"
-            >
-              <div class="flex items-center gap-1.5">
-                <span class="w-3 h-3 rounded-full bg-[#f0c20a] border border-black/60"></span>
-                <span class="text-xs font-extrabold">👔 FARDA</span>
+              <!-- Texto Bordado: Posto em Cima e Nome do Aluno em Baixo (Padrão Oficial CPM) -->
+              <div class="flex flex-col items-center justify-center z-10 px-2 w-full text-center overflow-hidden">
+                <div 
+                  id="displayPosto" 
+                  class="embroidered-text uppercase tracking-wider whitespace-nowrap leading-[0.98] text-center"
+                >ALUNA</div>
+                <div 
+                  id="displayNome" 
+                  class="embroidered-text uppercase tracking-wider whitespace-nowrap leading-[0.98] text-center mt-0.5"
+                >MONIQUE</div>
               </div>
-              <span class="text-[10px] text-gray-400 font-normal">Cinza c/ Amarelo</span>
-            </button>
+            </div>
+
+            <span class="text-[10px] text-gray-400 mt-2 text-center">
+              Padrão Regulamentar CPM • Ponto cheio industrial de alta densidade
+            </span>
           </div>
         </div>
 
-        <!-- 1.2 Titulação / Posto -->
-        <div>
-          <label class="block text-[11px] font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
-            Titulação:
-          </label>
-          <div class="grid grid-cols-3 gap-2">
-            <button type="button" onclick="setPosto('ALUNA')" id="btn-aluna" class="posto-btn py-1.5 px-2 rounded-lg text-xs font-bold bg-[#233827] border border-[#4d7c0f] text-[#86efac] transition-all">
-              ALUNA
-            </button>
-            <button type="button" onclick="setPosto('ALUNO')" id="btn-aluno" class="posto-btn py-1.5 px-2 rounded-lg text-xs font-bold bg-[#1c261e] border border-[#334636] text-gray-300 transition-all hover:bg-[#233026]">
-              ALUNO
-            </button>
-            <button type="button" onclick="setPosto('')" id="btn-outro" class="posto-btn py-1.5 px-2 rounded-lg text-xs font-bold bg-[#1c261e] border border-[#334636] text-gray-300 transition-all hover:bg-[#233026]">
-              SEM POSTO
-            </button>
+        <!-- ==================== SEÇÃO 2: DIVISA DE SÉRIE ==================== -->
+        <div class="space-y-3.5 pt-2">
+          <div class="flex items-center justify-between border-b border-[#2a382c] pb-2 gap-2">
+            <span class="text-xs sm:text-sm font-black text-white uppercase tracking-wider flex items-center gap-1.5 min-w-0">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400 flex-shrink-0"></span>
+              <span class="truncate">2. DIVISA DE SÉRIE (ESTRELA + NÚMERO)</span>
+            </span>
+            <span class="inline-flex items-baseline gap-1 flex-shrink-0 whitespace-nowrap text-[#f0c20a] drop-shadow-[0_2px_12px_rgba(240,194,10,0.5)] select-none">
+              <span class="text-xs sm:text-sm font-bold opacity-85 font-mono">R$</span>
+              <span class="text-xl sm:text-2xl font-black font-mono tracking-tight leading-none">10,00</span>
+            </span>
+          </div>
+
+          <!-- Seleção da Série (6, 7, 8, 9 / 1, 2, 3) -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="text-xs font-semibold text-gray-300 uppercase tracking-wide">
+                Escolha a Série do Estudante:
+              </label>
+              <span class="text-[10px] text-gray-400 font-mono">Ensino Fund. e Médio</span>
+            </div>
+            
+            <div class="grid grid-cols-7 gap-1">
+              <button type="button" onclick="setSerie('6')" id="btn-serie-6" class="serie-btn py-2 px-1 rounded-xl text-xs font-bold bg-[#1c261e] border border-[#334636] text-gray-300 transition-all hover:bg-[#233026] text-center cursor-pointer">6º</button>
+              <button type="button" onclick="setSerie('7')" id="btn-serie-7" class="serie-btn py-2 px-1 rounded-xl text-xs font-bold bg-[#1c261e] border border-[#334636] text-gray-300 transition-all hover:bg-[#233026] text-center cursor-pointer">7º</button>
+              <button type="button" onclick="setSerie('8')" id="btn-serie-8" class="serie-btn py-2 px-1 rounded-xl text-xs font-bold bg-[#1c261e] border border-[#334636] text-gray-300 transition-all hover:bg-[#233026] text-center cursor-pointer">8º</button>
+              <button type="button" onclick="setSerie('9')" id="btn-serie-9" class="serie-btn py-2 px-1 rounded-xl text-xs font-bold bg-[#1c261e] border border-[#334636] text-gray-300 transition-all hover:bg-[#233026] text-center cursor-pointer">9º</button>
+              <button type="button" onclick="setSerie('1')" id="btn-serie-1" class="serie-btn py-2 px-1 rounded-xl text-xs font-bold bg-[#233827] border border-[#4d7c0f] text-[#86efac] shadow-md transition-all text-center cursor-pointer">1º</button>
+              <button type="button" onclick="setSerie('2')" id="btn-serie-2" class="serie-btn py-2 px-1 rounded-xl text-xs font-bold bg-[#1c261e] border border-[#334636] text-gray-300 transition-all hover:bg-[#233026] text-center cursor-pointer">2º</button>
+              <button type="button" onclick="setSerie('3')" id="btn-serie-3" class="serie-btn py-2 px-1 rounded-xl text-xs font-bold bg-[#1c261e] border border-[#334636] text-gray-300 transition-all hover:bg-[#233026] text-center cursor-pointer">3º</button>
+            </div>
+          </div>
+
+          <!-- Preview da Divisa de Série CPM -->
+          <div class="bg-[#080b09] p-3.5 rounded-xl border border-[#232e25] flex flex-col items-center">
+            <div class="w-full flex justify-between items-center mb-2 text-[10px] font-mono text-gray-400">
+              <span id="labelSerieBadge" class="text-amber-400 font-semibold uppercase">Nº 1 • 1º ANO (ENSINO MÉDIO)</span>
+              <span>PADRÃO CPM</span>
+            </div>
+
+            <!-- Patch Retangular Vertical da Divisa -->
+            <div class="w-[84px] h-[106px] fabric-divisa divisa-frame rounded-md flex flex-col items-center justify-between py-2 relative select-none shadow-2xl">
+              <!-- Pesponto interno -->
+              <div class="absolute inset-[3px] border border-dashed border-[#132c8c]/30 pointer-events-none rounded-[2px]"></div>
+
+              <!-- Estrela Facetada em 3D Bordada em Azul Royal -->
+              <div class="z-10 mt-1">
+                <svg width="34" height="34" viewBox="0 0 100 100" class="drop-shadow-md">
+                  <polygon points="50,5 64,36 98,36 70,57 81,91 50,70 19,91 30,57 2,36 36,36" fill="#132c8c" />
+                  <polygon points="50,5 64,36 50,70" fill="#2a4dc7" />
+                  <polygon points="50,70 81,91 70,57" fill="#0c1d61" />
+                  <polygon points="50,70 19,91 30,57" fill="#2a4dc7" />
+                  <polygon points="50,5 36,36 50,70" fill="#0c1d61" />
+                  <polygon points="98,36 70,57 50,70" fill="#2a4dc7" />
+                  <polygon points="2,36 30,57 50,70" fill="#0c1d61" />
+                </svg>
+              </div>
+
+              <!-- Número da Série em Ponto Cheio Bordado -->
+              <div class="z-10 -mt-1 mb-0.5">
+                <span id="divisaNumberDisplay" class="divisa-number text-4xl leading-none">1</span>
+              </div>
+            </div>
+
+            <span class="text-[10px] text-gray-400 mt-2 text-center">
+              Tecido técnico favo de mel prateado com estrela e número bordados em Azul Royal
+            </span>
           </div>
         </div>
 
-        <!-- 1.3 Nome de Guerra -->
-        <div>
-          <label class="block text-[11px] font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
-            Nome a Bordar:
-          </label>
-          <input 
-            type="text" 
-            id="inputNome" 
-            value="MONIQUE" 
-            maxlength="16"
-            class="w-full bg-[#1c261e] border border-[#334636] rounded-xl px-4 py-2 text-sm text-white font-bold tracking-wider focus:outline-none focus:border-[#4d7c0f] uppercase"
-            placeholder="EX: MONIQUE / HENRIQUE / SILVA"
-            oninput="renderAll()"
-          >
+        <!-- ==================== SEÇÃO 3: DIVISA DE TURNO ==================== -->
+        <div class="space-y-3.5 pt-2">
+          <div class="flex items-center justify-between border-b border-[#2a382c] pb-2 gap-2">
+            <span class="text-xs sm:text-sm font-black text-white uppercase tracking-wider flex items-center gap-1.5 min-w-0">
+              <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 flex-shrink-0"></span>
+              <span class="truncate">3. DIVISA DE TURNO (MEIA-LUA EM ARCO)</span>
+            </span>
+            <span class="inline-flex items-baseline gap-1 flex-shrink-0 whitespace-nowrap text-[#f0c20a] drop-shadow-[0_2px_12px_rgba(240,194,10,0.5)] select-none">
+              <span class="text-xs sm:text-sm font-bold opacity-85 font-mono">R$</span>
+              <span class="text-xl sm:text-2xl font-black font-mono tracking-tight leading-none">10,00</span>
+            </span>
+          </div>
+
+          <!-- Seleção do Turno: Manhã (Azul) vs Tarde (Vermelho) -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wide mb-1.5">
+              Escolha o Turno do Estudante:
+            </label>
+            <div class="grid grid-cols-2 gap-2">
+              <button 
+                id="btn-turno-manha"
+                type="button" 
+                onclick="setTurno('MANHA')" 
+                class="py-2.5 px-3 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-1 text-center bg-[#233827] border-[#4d7c0f] text-[#86efac] shadow-md cursor-pointer"
+              >
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-[#132c8c] border border-cyan-400"></span>
+                  <span class="font-extrabold">TURNO MANHÃ</span>
+                </div>
+                <span class="text-[10px] font-mono text-cyan-300">Bordado Azul Royal</span>
+              </button>
+
+              <button 
+                id="btn-turno-tarde"
+                type="button" 
+                onclick="setTurno('TARDE')" 
+                class="py-2.5 px-3 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-1 text-center bg-[#1c261e] border-[#334636] text-gray-300 hover:bg-[#233026] cursor-pointer"
+              >
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-[#dc2626] border border-red-400"></span>
+                  <span class="font-extrabold">TURNO TARDE</span>
+                </div>
+                <span class="text-[10px] font-mono text-red-400">Bordado Vermelho</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Preview da Divisa de Turno (Meia-Lua em Arco Oficial CPM - 100% Centralizado) -->
+          <div class="bg-[#080b09] p-3.5 rounded-xl border border-[#232e25] flex flex-col items-center">
+            <div class="w-full flex justify-between items-center mb-2 text-[10px] font-mono text-gray-400">
+              <span id="labelTurnoBadge" class="text-cyan-400 font-semibold uppercase">PRÉVIA: MANHÃ (AZUL)</span>
+              <span>PADRÃO OFICIAL CPM</span>
+            </div>
+
+            <!-- SVG da Meia-Lua Curva Fiel ao Anexo Enviado -->
+            <div class="w-full flex items-center justify-center py-2 px-1">
+              <svg viewBox="0 0 340 125" class="w-full max-w-[340px] h-auto drop-shadow-2xl overflow-visible" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <!-- Trama piqué/favo de mel do tecido de fundo -->
+                  <pattern id="meshPatternTurno" width="5" height="5" patternUnits="userSpaceOnUse">
+                    <rect width="5" height="5" fill="#f8fafc" />
+                    <circle cx="1.5" cy="1.5" r="0.9" fill="#94a3b8" opacity="0.75" />
+                    <circle cx="4" cy="4" r="0.9" fill="#94a3b8" opacity="0.75" />
+                  </pattern>
+                </defs>
+
+                <!-- Forma do Patch Meia-Lua com proporções e raios oficiais -->
+                <path id="turnoPatchBg" 
+                      d="M 37.7 63.0 A 225 225 0 0 1 302.3 63.0 L 264.0 115.6 A 160 160 0 0 0 76.0 115.6 Z" 
+                      fill="url(#meshPatternTurno)" 
+                      stroke="#132c8c" 
+                      stroke-width="7" 
+                      stroke-linejoin="round"
+                      style="transition: stroke 0.25s ease;"
+                />
+
+                <!-- Pesponto bordado interno -->
+                <path id="turnoInnerStitch" 
+                      d="M 42 66 A 219 219 0 0 1 298 66 L 261 112 A 166 166 0 0 0 79 112 Z" 
+                      fill="none" 
+                      stroke="rgba(19, 44, 140, 0.3)" 
+                      stroke-width="1.5" 
+                      stroke-dasharray="3.5 3"
+                      style="transition: stroke 0.25s ease;"
+                />
+
+                <!-- Letras MANHÃ: Perfeitamente centralizadas e orientadas radialmente -->
+                <g id="groupTurnoManha" 
+                   font-family="'Montserrat', 'Arial Black', sans-serif" 
+                   font-weight="900" 
+                   font-size="34px" 
+                   fill="#132c8c" 
+                   text-anchor="middle"
+                   style="filter: drop-shadow(0.5px 1.5px 1px rgba(0,0,0,0.35)); transition: fill 0.25s ease;"
+                >
+                  <text transform="rotate(-27, 170, 245)" x="170" y="66.5">M</text>
+                  <text transform="rotate(-13.5, 170, 245)" x="170" y="66.5">A</text>
+                  <text transform="rotate(0, 170, 245)" x="170" y="66.5">N</text>
+                  <text transform="rotate(13.5, 170, 245)" x="170" y="66.5">H</text>
+                  <text transform="rotate(27, 170, 245)" x="170" y="66.5">Ã</text>
+                </g>
+
+                <!-- Letras TARDE: Vermelho Oficial CPM, perfeitamente centralizadas no R -->
+                <g id="groupTurnoTarde" 
+                   font-family="'Montserrat', 'Arial Black', sans-serif" 
+                   font-weight="900" 
+                   font-size="34px" 
+                   fill="#dc2626" 
+                   text-anchor="middle"
+                   style="filter: drop-shadow(0.5px 1.5px 1px rgba(0,0,0,0.35)); display: none; transition: fill 0.25s ease;"
+                >
+                  <text transform="rotate(-27, 170, 245)" x="170" y="66.5">T</text>
+                  <text transform="rotate(-13.5, 170, 245)" x="170" y="66.5">A</text>
+                  <text transform="rotate(0, 170, 245)" x="170" y="66.5">R</text>
+                  <text transform="rotate(13.5, 170, 245)" x="170" y="66.5">D</text>
+                  <text transform="rotate(27, 170, 245)" x="170" y="66.5">E</text>
+                </g>
+              </svg>
+            </div>
+
+            <span id="descTurnoCor" class="text-[10px] text-gray-400 mt-1 text-center">
+              Borda e letras em Azul Royal Oficial (Turno Manhã)
+            </span>
+          </div>
         </div>
 
-        <!-- Preview da Biriba -->
-        <div class="bg-[#080b09] p-3.5 rounded-xl border border-[#232e25] flex flex-col items-center">
-          <div class="w-full flex justify-between items-center mb-2 text-[10px] font-mono text-gray-400">
-            <span id="badgeModelo" class="text-lime-400 font-semibold uppercase">PRÉVIA: AGASALHO</span>
-            <span>12,0 cm × 2,5 cm</span>
+        <!-- ==================== SEÇÃO 4: QUANTIDADES INICIAIS ZERADAS ==================== -->
+        <div class="bg-[#18201a] p-4 rounded-xl border border-[#2a382c] space-y-3 border-t">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-semibold text-gray-300 uppercase tracking-wide">
+              4. Escolha as quantidades desejadas no seu kit:
+            </label>
+            <span class="text-[10px] text-gray-400 font-mono">Inicia zerado</span>
           </div>
           
-          <div class="w-full overflow-x-auto py-1 flex justify-center">
-            <div 
-              id="biribaContainer"
-              class="w-[360px] h-[76px] max-w-full fabric-agasalho biriba-frame rounded-sm flex flex-col items-center justify-center relative select-none shadow-2xl transition-all"
-              style="aspect-ratio: 4.8 / 1;"
+          <!-- Biriba Agasalho (Branca com Azul) -->
+          <div class="flex items-center justify-between bg-[#111712] p-2.5 rounded-lg border border-[#2a382c]">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="setModelo('AGASALHO')">
+              <span class="w-3 h-3 rounded-full bg-[#132c8c] border border-white/80"></span>
+              <div>
+                <div class="text-xs font-bold text-white flex items-center gap-1">
+                  <span>🧥 BIRIBA AGASALHO</span>
+                  <span class="text-[9px] text-lime-400 bg-lime-950/70 px-1 py-0.5 rounded border border-lime-800/60 font-mono">Branca</span>
+                </div>
+                <div class="text-xs font-bold text-[#f0c20a] font-mono flex items-baseline gap-1 mt-0.5 whitespace-nowrap">
+                  <span class="text-[10px] opacity-85">R$</span>
+                  <span class="text-sm font-black text-[#f0c20a]">20,00</span>
+                  <span class="text-[10px] text-gray-400 font-normal ml-0.5">cada</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="changeQty('agasalho', -1)" class="w-7 h-7 rounded-lg bg-[#233827] text-white font-bold hover:bg-[#344d37] active:scale-95 flex items-center justify-center text-xs border border-[#3b593f] transition-all cursor-pointer">-</button>
+              <span id="qtyAgasalho" class="w-5 text-center font-bold text-white text-xs">0</span>
+              <button type="button" onclick="changeQty('agasalho', 1)" class="w-7 h-7 rounded-lg bg-[#233827] text-white font-bold hover:bg-[#344d37] active:scale-95 flex items-center justify-center text-xs border border-[#3b593f] transition-all cursor-pointer">+</button>
+            </div>
+          </div>
+
+          <!-- Biriba Farda (Cinza com Amarelo) -->
+          <div class="flex items-center justify-between bg-[#111712] p-2.5 rounded-lg border border-[#2a382c]">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="setModelo('FARDA')">
+              <span class="w-3 h-3 rounded-full bg-[#f0c20a] border border-black/80"></span>
+              <div>
+                <div class="text-xs font-bold text-white flex items-center gap-1">
+                  <span>👔 BIRIBA FARDA</span>
+                  <span class="text-[9px] text-amber-400 bg-amber-950/70 px-1 py-0.5 rounded border border-amber-800/60 font-mono">Cinza</span>
+                </div>
+                <div class="text-xs font-bold text-[#f0c20a] font-mono flex items-baseline gap-1 mt-0.5 whitespace-nowrap">
+                  <span class="text-[10px] opacity-85">R$</span>
+                  <span class="text-sm font-black text-[#f0c20a]">20,00</span>
+                  <span class="text-[10px] text-gray-400 font-normal ml-0.5">cada</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="changeQty('farda', -1)" class="w-7 h-7 rounded-lg bg-[#233827] text-white font-bold hover:bg-[#344d37] active:scale-95 flex items-center justify-center text-xs border border-[#3b593f] transition-all cursor-pointer">-</button>
+              <span id="qtyFarda" class="w-5 text-center font-bold text-white text-xs">0</span>
+              <button type="button" onclick="changeQty('farda', 1)" class="w-7 h-7 rounded-lg bg-[#233827] text-white font-bold hover:bg-[#344d37] active:scale-95 flex items-center justify-center text-xs border border-[#3b593f] transition-all cursor-pointer">+</button>
+            </div>
+          </div>
+
+          <!-- Divisa de Série CPM -->
+          <div class="flex items-center justify-between bg-[#111712] p-2.5 rounded-lg border border-[#2a382c]">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-[#132c8c] border border-amber-400"></span>
+              <div>
+                <div class="text-xs font-bold text-white flex items-center gap-1">
+                  <span>⭐ DIVISA DE SÉRIE</span>
+                  <span id="tagDivisaQtd" class="text-[9px] text-amber-400 bg-amber-950/70 px-1 py-0.5 rounded border border-amber-800/60 font-mono">Nº 1</span>
+                </div>
+                <div class="text-xs font-bold text-[#f0c20a] font-mono flex items-baseline gap-1 mt-0.5 whitespace-nowrap">
+                  <span class="text-[10px] opacity-85">R$</span>
+                  <span class="text-sm font-black text-[#f0c20a]">10,00</span>
+                  <span class="text-[10px] text-gray-400 font-normal ml-0.5">cada</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="changeQty('divisa', -1)" class="w-7 h-7 rounded-lg bg-[#233827] text-white font-bold hover:bg-[#344d37] active:scale-95 flex items-center justify-center text-xs border border-[#3b593f] transition-all cursor-pointer">-</button>
+              <span id="qtyDivisa" class="w-5 text-center font-bold text-white text-xs">0</span>
+              <button type="button" onclick="changeQty('divisa', 1)" class="w-7 h-7 rounded-lg bg-[#233827] text-white font-bold hover:bg-[#344d37] active:scale-95 flex items-center justify-center text-xs border border-[#3b593f] transition-all cursor-pointer">+</button>
+            </div>
+          </div>
+
+          <!-- Divisa de Turno CPM -->
+          <div class="flex items-center justify-between bg-[#111712] p-2.5 rounded-lg border border-[#2a382c]">
+            <div class="flex items-center gap-2">
+              <span id="dotTurnoQtd" class="w-3 h-3 rounded-full bg-[#132c8c] border border-cyan-400"></span>
+              <div>
+                <div class="text-xs font-bold text-white flex items-center gap-1">
+                  <span>🌙 DIVISA DE TURNO</span>
+                  <span id="tagTurnoQtd" class="text-[9px] text-cyan-400 bg-cyan-950/70 px-1 py-0.5 rounded border border-cyan-800/60 font-mono">MANHÃ</span>
+                </div>
+                <div class="text-xs font-bold text-[#f0c20a] font-mono flex items-baseline gap-1 mt-0.5 whitespace-nowrap">
+                  <span class="text-[10px] opacity-85">R$</span>
+                  <span class="text-sm font-black text-[#f0c20a]">10,00</span>
+                  <span class="text-[10px] text-gray-400 font-normal ml-0.5">cada</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="changeQty('turno', -1)" class="w-7 h-7 rounded-lg bg-[#233827] text-white font-bold hover:bg-[#344d37] active:scale-95 flex items-center justify-center text-xs border border-[#3b593f] transition-all cursor-pointer">-</button>
+              <span id="qtyTurno" class="w-5 text-center font-bold text-white text-xs">0</span>
+              <button type="button" onclick="changeQty('turno', 1)" class="w-7 h-7 rounded-lg bg-[#233827] text-white font-bold hover:bg-[#344d37] active:scale-95 flex items-center justify-center text-xs border border-[#3b593f] transition-all cursor-pointer">+</button>
+            </div>
+          </div>
+
+          <!-- Resumo de Totais -->
+          <div class="flex justify-between items-center pt-2.5 border-t border-[#2a382c] text-xs">
+            <span class="text-gray-300">Total de itens: <strong id="totalItems" class="text-white font-mono">0 itens</strong></span>
+            <span class="text-sm font-extrabold text-[#86efac]">Valor Total: <strong id="totalPreco">R$ 0,00</strong></span>
+          </div>
+        </div>
+
+        <!-- ==================== SEÇÃO 5: DADOS DO CLIENTE PARA AVISO DE RETIRADA ==================== -->
+        <div class="bg-[#18201a] p-3.5 rounded-xl border border-[#2a382c] space-y-2.5">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-gray-200 uppercase tracking-wide flex items-center gap-1.5">
+              <span>📱</span>
+              <span>Dados para Aviso de Retirada:</span>
+            </label>
+            <span class="text-[10px] text-lime-400 font-mono">Aviso WhatsApp</span>
+          </div>
+          <p class="text-[11px] text-gray-400 leading-tight">
+            Informe seu nome e WhatsApp para ser avisado pela produção assim que o bordado estiver pronto:
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] text-gray-400 mb-0.5">Seu Nome / Responsável:</label>
+              <input 
+                id="inputClienteNome" 
+                type="text" 
+                placeholder="Ex: Juliana Santos" 
+                class="w-full bg-[#0d130f] border border-[#2a382c] rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-lime-500 font-sans"
+              />
+            </div>
+            <div>
+              <label class="block text-[10px] text-gray-400 mb-0.5">Seu WhatsApp (com DDD):</label>
+              <input 
+                id="inputClienteTelefone" 
+                type="tel" 
+                placeholder="Ex: (42) 99999-0000" 
+                class="w-full bg-[#0d130f] border border-[#2a382c] rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-lime-500 font-mono"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Botão Direto para o WhatsApp e Registro na Produção -->
+        <button 
+          id="btnWhatsApp"
+          type="button" 
+          onclick="encomendarEGravarPedido()" 
+          class="w-full py-4 px-4 bg-[#1c261e] text-gray-400 border border-[#2a382c] font-extrabold text-sm sm:text-base rounded-xl shadow-xl transition-all flex items-center justify-center gap-2 text-center cursor-pointer"
+        >
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+          <span id="btnText">ESCOLHA A QUANTIDADE DOS ITENS ACIMA (+)</span>
+        </button>
+
+        <!-- ================================================================ -->
+        <!--        CANAIS DE COMUNICAÇÃO & ATENDIMENTO OFICIAL               -->
+        <!-- ================================================================ -->
+        <div class="bg-[#0b100d] border border-[#233126] rounded-xl p-3.5 space-y-2 mt-4 shadow-lg">
+          <div class="text-center pb-1">
+            <span class="text-[10px] font-mono uppercase tracking-widest text-amber-400 font-bold">
+              CANAIS DE COMUNICAÇÃO & ATENDIMENTO
+            </span>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <!-- 1. WHATSAPP OFICIAL -->
+            <a 
+              href="https://wa.me/5542999538715" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              class="flex items-center justify-between p-2.5 rounded-lg bg-[#121a14] hover:bg-[#19241c] border border-[#223326] hover:border-emerald-500/50 transition-all text-xs group"
             >
-              <div id="displayPosto" class="embroidered-text text-[26px] font-black leading-[0.95] tracking-tight uppercase text-center">
-                ALUNA
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-md bg-[#25D366]/15 border border-[#25D366]/30 flex items-center justify-center text-sm flex-shrink-0">
+                  💬
+                </div>
+                <div class="text-left leading-tight">
+                  <span class="block text-gray-400 text-[10px] font-mono uppercase">WhatsApp Oficial</span>
+                  <span class="text-white font-bold group-hover:text-emerald-400 font-mono">(42) 99953-8715</span>
+                </div>
               </div>
-              <div id="displayNome" class="embroidered-text text-[26px] font-black leading-[0.95] tracking-tight uppercase text-center mt-0.5">
-                MONIQUE
+              <span class="text-[10px] text-emerald-400 font-bold group-hover:underline flex-shrink-0">Conversar →</span>
+            </a>
+
+            <!-- 2. SITE OFICIAL -->
+            <a 
+              href="https://www.evolucaomilitar.com.br" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              class="flex items-center justify-between p-2.5 rounded-lg bg-[#121a14] hover:bg-[#19241c] border border-[#223326] hover:border-amber-500/50 transition-all text-xs group"
+            >
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-md bg-[#f0c20a]/15 border border-[#f0c20a]/30 flex items-center justify-center text-sm flex-shrink-0">
+                  🌐
+                </div>
+                <div class="text-left leading-tight">
+                  <span class="block text-gray-400 text-[10px] font-mono uppercase">Visite nosso site</span>
+                  <span class="text-[#f0c20a] font-bold group-hover:underline">www.evolucaomilitar.com.br</span>
+                </div>
               </div>
-              <div id="innerStitch" class="absolute inset-[3px] border border-dashed border-[#132c8c]/25 pointer-events-none transition-colors"></div>
-            </div>
-          </div>
-        </div>
-      </div>
+              <span class="text-[10px] text-[#f0c20a] font-bold group-hover:underline flex-shrink-0">Acessar →</span>
+            </a>
 
-      <!-- ==================== SEÇÃO 2: DIVISA DE SÉRIE ==================== -->
-      <div class="space-y-3.5 border-t border-[#2a382c] pt-4">
-        <div class="flex items-center justify-between border-b border-[#2a382c] pb-1.5">
-          <span class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-            2. DIVISA DE SÉRIE (CPM)
-          </span>
-          <span class="text-[11px] font-bold text-amber-400 font-mono">R$ 10,00</span>
-        </div>
-
-        <div>
-          <label class="block text-[11px] font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
-            Selecione a série / ano do aluno:
-          </label>
-
-          <!-- Ensino Fundamental -->
-          <div class="mb-2">
-            <span class="text-[10px] text-gray-400 font-mono uppercase block mb-1">Ensino Fundamental (6 ao 9):</span>
-            <div class="grid grid-cols-4 gap-1.5">
-              <button type="button" onclick="setSerie('6')" id="btn-serie-6" class="serie-btn py-2 px-1 rounded-xl text-xs font-bold bg-[#1c261e] border border-[#334636] text-gray-300 transition-all hover:bg-[#233026] text-center">
-                <span class="text-base font-black block leading-none">6</span>
-                <span class="text-[9px] font-normal text-gray-400">6º Ano</span>
-              </button>
-              <button type="button" onclick="setSerie('7')" id="btn-serie-7" class="serie-btn py-2 px-1 rounded-xl text-xs font-bold bg-[#1c261e] border border-[#334636] text-gray-300 transition-all hover:bg-[#233026] text-center">
-                <span class="text-base font-black block leading-none">7</span>
-                <span class="text-[9px] font-normal text-gray-400">7º Ano</span>
-              </button>
-              <button type="button" onclick="setSerie('8')" id="btn-serie-8" class="serie-btn py-2 px-1 rounded-xl text-xs font-bold bg-[#1c261e] border border-[#334636] text-gray-300 transition-all hover:bg-[#233026] text-center">
-                <span class="text-base font-black block leading-none">8</span>
-                <span class="text-[9px] font-normal text-gray-400">8º Ano</span>
-              </button>
-              <button type="button" onclick="setSerie('9')" id="btn-serie-9" class="serie-btn py-2 px-1 rounded-xl text-xs font-bold bg-[#1c261e] border border-[#334636] text-gray-300 transition-all hover:bg-[#233026] text-center">
-                <span class="text-base font-black block leading-none">9</span>
-                <span class="text-[9px] font-normal text-gray-400">9º Ano</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Ensino Médio -->
-          <div>
-            <span class="text-[10px] text-gray-400 font-mono uppercase block mb-1">Ensino Médio (1 ao 3):</span>
-            <div class="grid grid-cols-3 gap-1.5">
-              <button type="button" onclick="setSerie('1')" id="btn-serie-1" class="serie-btn py-2 px-1 rounded-xl text-xs font-bold bg-[#233827] border border-[#4d7c0f] text-[#86efac] shadow-md transition-all text-center">
-                <span class="text-base font-black block leading-none">1</span>
-                <span class="text-[9px] font-normal text-gray-300">1º Ano EM</span>
-              </button>
-              <button type="button" onclick="setSerie('2')" id="btn-serie-2" class="serie-btn py-2 px-1 rounded-xl text-xs font-bold bg-[#1c261e] border border-[#334636] text-gray-300 transition-all hover:bg-[#233026] text-center">
-                <span class="text-base font-black block leading-none">2</span>
-                <span class="text-[9px] font-normal text-gray-400">2º Ano EM</span>
-              </button>
-              <button type="button" onclick="setSerie('3')" id="btn-serie-3" class="serie-btn py-2 px-1 rounded-xl text-xs font-bold bg-[#1c261e] border border-[#334636] text-gray-300 transition-all hover:bg-[#233026] text-center">
-                <span class="text-base font-black block leading-none">3</span>
-                <span class="text-[9px] font-normal text-gray-400">3º Ano EM</span>
-              </button>
-            </div>
+            <!-- 3. INSTAGRAM OFICIAL -->
+            <a 
+              href="https://www.instagram.com/evolucaomilitar" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              class="flex items-center justify-between p-2.5 rounded-lg bg-[#121a14] hover:bg-[#19241c] border border-[#223326] hover:border-pink-500/50 transition-all text-xs group"
+            >
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-md bg-pink-500/15 border border-pink-500/30 flex items-center justify-center text-sm flex-shrink-0">
+                  📸
+                </div>
+                <div class="text-left leading-tight">
+                  <span class="block text-gray-400 text-[10px] font-mono uppercase">Siga no Instagram</span>
+                  <span class="text-pink-400 font-bold group-hover:underline">@evolucaomilitar</span>
+                </div>
+              </div>
+              <span class="text-[10px] text-pink-400 font-bold group-hover:underline flex-shrink-0">Seguir →</span>
+            </a>
           </div>
         </div>
 
-        <!-- Preview da Divisa de Série -->
-        <div class="bg-[#080b09] p-3.5 rounded-xl border border-[#232e25] flex flex-col items-center">
-          <div class="w-full flex justify-between items-center mb-2 text-[10px] font-mono text-gray-400">
-            <span class="text-amber-400 font-semibold uppercase">PRÉVIA: DIVISA DE SÉRIE</span>
-            <span id="labelSerieBadge">Nº 1 • 1º ANO EM</span>
+        <!-- ================================================================ -->
+        <!--        RODAPÉ NO FINAL DA PÁGINA COM ACESSO AO ADMIN             -->
+        <!-- ================================================================ -->
+        <div class="mt-5 pt-3.5 border-t border-[#223126] flex flex-col sm:flex-row items-center justify-between text-[11px] text-gray-500 gap-2">
+          <div class="text-center sm:text-left text-gray-400">
+            <strong class="text-gray-300">Evolução Militar</strong> • Bordados CPM
           </div>
 
-          <div class="w-[105px] h-[160px] fabric-divisa divisa-frame rounded-sm flex flex-col items-center justify-between py-3 relative select-none shadow-2xl">
-            <!-- Estrela Bordada 3D Facetada em Azul Royal -->
-            <svg viewBox="0 0 100 100" class="w-14 h-14 drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]">
-              <polygon points="50,50 50,6 39,35" fill="#1e40af" />
-              <polygon points="50,50 50,6 61,35" fill="#0c1d57" />
-              <polygon points="50,50 92,36 61,35" fill="#2563eb" />
-              <polygon points="50,50 92,36 67,56" fill="#091540" />
-              <polygon points="50,50 76,86 67,56" fill="#1e40af" />
-              <polygon points="50,50 76,86 50,68" fill="#091540" />
-              <polygon points="50,50 24,86 50,68" fill="#2563eb" />
-              <polygon points="50,50 24,86 33,56" fill="#0c1d57" />
-              <polygon points="50,50 8,36 33,56" fill="#1e40af" />
-              <polygon points="50,50 8,36 39,35" fill="#0c1d57" />
-            </svg>
-
-            <!-- Número da Série Bordado -->
-            <div id="divisaNumberDisplay" class="divisa-number text-[62px] font-black leading-none text-center">
-              1
-            </div>
-
-            <div class="absolute inset-[2.5px] border border-dashed border-[#132c8c]/30 pointer-events-none"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ==================== SEÇÃO 3: DIVISA DE TURNO ==================== -->
-      <div class="space-y-3.5 border-t border-[#2a382c] pt-4">
-        <div class="flex items-center justify-between border-b border-[#2a382c] pb-1.5">
-          <span class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-            3. DIVISA DE TURNO (MEIA-LUA CPM)
-          </span>
-          <span class="text-[11px] font-bold text-cyan-400 font-mono">R$ 10,00</span>
-        </div>
-
-        <div>
-          <label class="block text-[11px] font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
-            Selecione o turno do aluno:
-          </label>
-          <div class="grid grid-cols-2 gap-2.5">
-            <!-- Botão Turno Manhã -->
+          <div class="flex items-center gap-2 flex-wrap justify-center sm:justify-end">
+            <!-- Botão de Baixar / Instalar o App no Final da Página -->
             <button 
               type="button" 
-              onclick="setTurno('MANHA')" 
-              id="btn-turno-manha" 
-              class="py-2.5 px-3 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-1 text-center bg-[#233827] border-[#4d7c0f] text-[#86efac] shadow-md"
+              id="btnInstallFooter"
+              onclick="abrirModalInstalacao()" 
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#18281d] hover:bg-[#223929] text-lime-400 hover:text-lime-300 border border-[#2f5536] transition-all cursor-pointer font-bold text-[11px] shadow-sm"
             >
-              <div class="flex items-center gap-2">
-                <span class="w-3.5 h-3.5 rounded-full bg-[#132c8c] border border-white/60"></span>
-                <span class="text-xs font-extrabold uppercase">☀️ MANHÃ</span>
-              </div>
-              <span class="text-[10px] text-gray-300 font-normal">Bordado Azul Royal</span>
+              <span>📲</span>
+              <span id="btnInstallFooterLabel">Baixar / Instalar App</span>
             </button>
 
-            <!-- Botão Turno Tarde -->
+            <!-- Botão Discreto de Acesso ao Admin da Produção -->
             <button 
               type="button" 
-              onclick="setTurno('TARDE')" 
-              id="btn-turno-tarde" 
-              class="py-2.5 px-3 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-1 text-center bg-[#1c261e] border-[#334636] text-gray-300 hover:bg-[#233026]"
+              onclick="switchTab('admin')" 
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0e1410] hover:bg-[#1a251d] text-gray-400 hover:text-amber-400 border border-[#233125] hover:border-amber-700/50 transition-all cursor-pointer font-mono text-[10px]"
             >
-              <div class="flex items-center gap-2">
-                <span class="w-3.5 h-3.5 rounded-full bg-[#dc2626] border border-white/60"></span>
-                <span class="text-xs font-extrabold uppercase">🌅 TARDE</span>
-              </div>
-              <span class="text-[10px] text-gray-400 font-normal">Bordado Vermelho</span>
+              <span>🔒</span>
+              <span>Acesso Restrito: Produção (Admin)</span>
             </button>
           </div>
         </div>
+      </div>
+    </div>
 
-        <!-- Preview da Divisa de Turno (Meia-Lua em Arco Oficial) -->
-        <div class="bg-[#080b09] p-3.5 rounded-xl border border-[#232e25] flex flex-col items-center">
-          <div class="w-full flex justify-between items-center mb-2 text-[10px] font-mono text-gray-400">
-            <span id="labelTurnoBadge" class="text-cyan-400 font-semibold uppercase">PRÉVIA: MANHÃ (AZUL)</span>
-            <span>PADRÃO OFICIAL CPM</span>
+    <!-- ================================================================ -->
+    <!--             ABA 2: PAINEL DA PRODUÇÃO & ADMIN (SENHA 104832)     -->
+    <!-- ================================================================ -->
+    <div id="viewAdmin" class="hidden p-4 sm:p-6 space-y-5">
+      
+      <!-- Cabeçalho do Painel da Produção com Botão de Voltar ao Simulador -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2a382c] pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-amber-400 animate-pulse"></span>
+            <h2 class="text-base sm:text-lg font-black tracking-wider text-white uppercase font-sans">
+              SETOR DE PRODUÇÃO & BORDADOS CPM
+            </h2>
           </div>
+          <p class="text-xs text-gray-400 font-mono mt-0.5">
+            Gestão da Fila de Bordado • Relatórios • Aviso Automático de Retirada
+          </p>
+        </div>
 
-          <!-- SVG da Meia-Lua Curva Fiel ao Anexo Enviado (Tamanho Grande e 100% Centralizado) -->
-          <div class="w-full flex items-center justify-center py-2 px-1">
-            <svg viewBox="0 0 340 125" class="w-full max-w-[340px] h-auto drop-shadow-2xl overflow-visible" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <!-- Trama piqué/favo de mel do tecido de fundo fiel ao patch real -->
-                <pattern id="meshPatternTurno" width="5" height="5" patternUnits="userSpaceOnUse">
-                  <rect width="5" height="5" fill="#f8fafc" />
-                  <circle cx="1.5" cy="1.5" r="0.9" fill="#94a3b8" opacity="0.75" />
-                  <circle cx="4" cy="4" r="0.9" fill="#94a3b8" opacity="0.75" />
-                </pattern>
-              </defs>
+        <div class="flex items-center gap-2 flex-wrap">
+          <!-- Botão Voltar ao Simulador -->
+          <button 
+            type="button" 
+            onclick="switchTab('simulador')" 
+            class="px-3 py-2 bg-[#1c261e] hover:bg-[#253328] border border-[#334636] text-gray-200 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+          >
+            <span>←</span>
+            <span>Voltar ao Simulador</span>
+          </button>
 
-              <!-- Forma do Patch Meia-Lua com proporções e raios oficiais -->
-              <path id="turnoPatchBg" 
-                    d="M 37.7 63.0 A 225 225 0 0 1 302.3 63.0 L 264.0 115.6 A 160 160 0 0 0 76.0 115.6 Z" 
-                    fill="url(#meshPatternTurno)" 
-                    stroke="#132c8c" 
-                    stroke-width="7" 
-                    stroke-linejoin="round"
-                    style="transition: stroke 0.25s ease;"
-              />
+          <!-- Botão Relatório de Produção -->
+          <button 
+            type="button" 
+            onclick="openRelatorioModal()" 
+            class="px-3 py-2 bg-[#1c2a38] hover:bg-[#25384d] border border-cyan-800 text-cyan-300 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+          >
+            <span>📊</span>
+            <span>Relatório Feitos x A Bordar</span>
+          </button>
 
-              <!-- Pesponto bordado interno -->
-              <path id="turnoInnerStitch" 
-                    d="M 42 66 A 219 219 0 0 1 298 66 L 261 112 A 166 166 0 0 0 79 112 Z" 
-                    fill="none" 
-                    stroke="rgba(19, 44, 140, 0.3)" 
-                    stroke-width="1.5" 
-                    stroke-dasharray="3.5 3"
-                    style="transition: stroke 0.25s ease;"
-              />
+          <button 
+            type="button" 
+            onclick="openNovoPedidoModal()" 
+            class="px-3 py-2 bg-[#233827] hover:bg-[#344d37] border border-[#3b593f] text-[#86efac] rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+          >
+            <span>➕</span>
+            <span>Novo Pedido</span>
+          </button>
 
-              <!-- Letras MANHÃ: Perfeitamente centralizadas e orientadas radialmente -->
-              <g id="groupTurnoManha" 
-                 font-family="'Montserrat', 'Arial Black', sans-serif" 
-                 font-weight="900" 
-                 font-size="34px" 
-                 fill="#132c8c" 
-                 text-anchor="middle"
-                 style="filter: drop-shadow(0.5px 1.5px 1px rgba(0,0,0,0.35)); transition: fill 0.25s ease;"
-              >
-                <text transform="rotate(-27, 170, 245)" x="170" y="66.5">M</text>
-                <text transform="rotate(-13.5, 170, 245)" x="170" y="66.5">A</text>
-                <text transform="rotate(0, 170, 245)" x="170" y="66.5">N</text>
-                <text transform="rotate(13.5, 170, 245)" x="170" y="66.5">H</text>
-                <text transform="rotate(27, 170, 245)" x="170" y="66.5">Ã</text>
-              </g>
+          <button 
+            type="button" 
+            onclick="abrirModalInstalacao()" 
+            title="Instalar aplicativo no aparelho ou baixar arquivo offline" 
+            class="px-2.5 py-2 bg-[#17271c] hover:bg-[#203627] border border-[#2d5236] text-lime-400 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+          >
+            <span>📲</span>
+            <span>App</span>
+          </button>
 
-              <!-- Letras TARDE: Vermelho Oficial CPM, perfeitamente centralizadas no R -->
-              <g id="groupTurnoTarde" 
-                 font-family="'Montserrat', 'Arial Black', sans-serif" 
-                 font-weight="900" 
-                 font-size="34px" 
-                 fill="#dc2626" 
-                 text-anchor="middle"
-                 style="filter: drop-shadow(0.5px 1.5px 1px rgba(0,0,0,0.35)); display: none; transition: fill 0.25s ease;"
-              >
-                <text transform="rotate(-27, 170, 245)" x="170" y="66.5">T</text>
-                <text transform="rotate(-13.5, 170, 245)" x="170" y="66.5">A</text>
-                <text transform="rotate(0, 170, 245)" x="170" y="66.5">R</text>
-                <text transform="rotate(13.5, 170, 245)" x="170" y="66.5">D</text>
-                <text transform="rotate(27, 170, 245)" x="170" y="66.5">E</text>
-              </g>
-            </svg>
-          </div>
+          <button 
+            type="button" 
+            onclick="exportarBackup()" 
+            title="Exportar pedidos para backup em JSON" 
+            class="px-2.5 py-2 bg-[#172119] hover:bg-[#202c22] border border-[#2a382c] text-gray-300 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+          >
+            <span>📥</span>
+            <span>Backup</span>
+          </button>
 
-          <span id="descTurnoCor" class="text-[10px] text-gray-400 mt-1 text-center">
-            Borda e letras em Azul Royal Oficial (Turno Manhã)
-          </span>
+          <button 
+            type="button" 
+            onclick="adminLogout()" 
+            class="px-2.5 py-2 bg-[#2a1818] hover:bg-[#3a2020] border border-[#522b2b] text-red-300 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+          >
+            <span>🔒</span>
+            <span>Bloquear</span>
+          </button>
         </div>
       </div>
 
-      <!-- ==================== SEÇÃO 4: QUANTIDADES E VALORES ==================== -->
-      <div class="bg-[#18201a] p-4 rounded-xl border border-[#2a382c] space-y-3 border-t">
-        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wide">
-          4. Quantidades desejadas no seu kit:
-        </label>
-        
-        <!-- Biriba Agasalho (Branca com Azul) -->
-        <div class="flex items-center justify-between bg-[#111712] p-2.5 rounded-lg border border-[#2a382c]">
-          <div class="flex items-center gap-2 cursor-pointer" onclick="setModelo('AGASALHO')">
-            <span class="w-3 h-3 rounded-full bg-[#132c8c] border border-white/80"></span>
-            <div>
-              <div class="text-xs font-bold text-white flex items-center gap-1">
-                <span>🧥 BIRIBA AGASALHO</span>
-                <span class="text-[9px] text-lime-400 bg-lime-950/70 px-1 py-0.5 rounded border border-lime-800/60 font-mono">Branca</span>
-              </div>
-              <div class="text-[10px] text-gray-400">R$ 20,00 cada</div>
-            </div>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <button type="button" onclick="changeQty('agasalho', -1)" class="w-7 h-7 rounded-lg bg-[#233827] text-white font-bold hover:bg-[#344d37] active:scale-95 flex items-center justify-center text-xs border border-[#3b593f] transition-all">-</button>
-            <span id="qtyAgasalho" class="w-5 text-center font-bold text-white text-xs">1</span>
-            <button type="button" onclick="changeQty('agasalho', 1)" class="w-7 h-7 rounded-lg bg-[#233827] text-white font-bold hover:bg-[#344d37] active:scale-95 flex items-center justify-center text-xs border border-[#3b593f] transition-all">+</button>
-          </div>
+      <!-- Resumo de Métricas Operacionais (KPIs) -->
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+        <div class="bg-[#0e1410] border border-[#263528] rounded-xl p-3 flex flex-col items-center justify-center text-center">
+          <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">A Fazer (Fila)</span>
+          <span id="metricAFazer" class="text-xl font-black text-amber-400 font-mono mt-1">0</span>
         </div>
-
-        <!-- Biriba Farda (Cinza com Amarelo) -->
-        <div class="flex items-center justify-between bg-[#111712] p-2.5 rounded-lg border border-[#2a382c]">
-          <div class="flex items-center gap-2 cursor-pointer" onclick="setModelo('FARDA')">
-            <span class="w-3 h-3 rounded-full bg-[#f0c20a] border border-black/80"></span>
-            <div>
-              <div class="text-xs font-bold text-white flex items-center gap-1">
-                <span>👔 BIRIBA FARDA</span>
-                <span class="text-[9px] text-amber-400 bg-amber-950/70 px-1 py-0.5 rounded border border-amber-800/60 font-mono">Cinza</span>
-              </div>
-              <div class="text-[10px] text-gray-400">R$ 20,00 cada</div>
-            </div>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <button type="button" onclick="changeQty('farda', -1)" class="w-7 h-7 rounded-lg bg-[#233827] text-white font-bold hover:bg-[#344d37] active:scale-95 flex items-center justify-center text-xs border border-[#3b593f] transition-all">-</button>
-            <span id="qtyFarda" class="w-5 text-center font-bold text-white text-xs">1</span>
-            <button type="button" onclick="changeQty('farda', 1)" class="w-7 h-7 rounded-lg bg-[#233827] text-white font-bold hover:bg-[#344d37] active:scale-95 flex items-center justify-center text-xs border border-[#3b593f] transition-all">+</button>
-          </div>
+        <div class="bg-[#0e1410] border border-[#263528] rounded-xl p-3 flex flex-col items-center justify-center text-center">
+          <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Bordando</span>
+          <span id="metricEmProducao" class="text-xl font-black text-cyan-400 font-mono mt-1">0</span>
         </div>
-
-        <!-- Divisa de Série CPM -->
-        <div class="flex items-center justify-between bg-[#111712] p-2.5 rounded-lg border border-[#2a382c]">
-          <div class="flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-[#132c8c] border border-amber-400"></span>
-            <div>
-              <div class="text-xs font-bold text-white flex items-center gap-1">
-                <span>⭐ DIVISA DE SÉRIE</span>
-                <span id="tagDivisaQtd" class="text-[9px] text-amber-400 bg-amber-950/70 px-1 py-0.5 rounded border border-amber-800/60 font-mono">Nº 1</span>
-              </div>
-              <div class="text-[10px] text-gray-400">R$ 10,00 cada</div>
-            </div>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <button type="button" onclick="changeQty('divisa', -1)" class="w-7 h-7 rounded-lg bg-[#233827] text-white font-bold hover:bg-[#344d37] active:scale-95 flex items-center justify-center text-xs border border-[#3b593f] transition-all">-</button>
-            <span id="qtyDivisa" class="w-5 text-center font-bold text-white text-xs">1</span>
-            <button type="button" onclick="changeQty('divisa', 1)" class="w-7 h-7 rounded-lg bg-[#233827] text-white font-bold hover:bg-[#344d37] active:scale-95 flex items-center justify-center text-xs border border-[#3b593f] transition-all">+</button>
-          </div>
+        <div class="bg-[#0e1410] border border-[#263528] rounded-xl p-3 flex flex-col items-center justify-center text-center">
+          <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Prontos</span>
+          <span id="metricProntos" class="text-xl font-black text-lime-400 font-mono mt-1">0</span>
         </div>
-
-        <!-- Divisa de Turno CPM -->
-        <div class="flex items-center justify-between bg-[#111712] p-2.5 rounded-lg border border-[#2a382c]">
-          <div class="flex items-center gap-2">
-            <span id="dotTurnoQtd" class="w-3 h-3 rounded-full bg-[#132c8c] border border-cyan-400"></span>
-            <div>
-              <div class="text-xs font-bold text-white flex items-center gap-1">
-                <span>🌙 DIVISA DE TURNO</span>
-                <span id="tagTurnoQtd" class="text-[9px] text-cyan-400 bg-cyan-950/70 px-1 py-0.5 rounded border border-cyan-800/60 font-mono">MANHÃ</span>
-              </div>
-              <div class="text-[10px] text-gray-400">R$ 10,00 cada</div>
-            </div>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <button type="button" onclick="changeQty('turno', -1)" class="w-7 h-7 rounded-lg bg-[#233827] text-white font-bold hover:bg-[#344d37] active:scale-95 flex items-center justify-center text-xs border border-[#3b593f] transition-all">-</button>
-            <span id="qtyTurno" class="w-5 text-center font-bold text-white text-xs">1</span>
-            <button type="button" onclick="changeQty('turno', 1)" class="w-7 h-7 rounded-lg bg-[#233827] text-white font-bold hover:bg-[#344d37] active:scale-95 flex items-center justify-center text-xs border border-[#3b593f] transition-all">+</button>
-          </div>
+        <div class="bg-[#0e1410] border border-[#263528] rounded-xl p-3 flex flex-col items-center justify-center text-center">
+          <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Entregues</span>
+          <span id="metricEntregues" class="text-xl font-black text-gray-400 font-mono mt-1">0</span>
         </div>
-
-        <!-- Resumo -->
-        <div class="flex justify-between items-center pt-2.5 border-t border-[#2a382c] text-xs">
-          <span class="text-gray-300">Total de itens: <strong id="totalItems" class="text-white font-mono">4</strong></span>
-          <span class="text-sm font-extrabold text-[#86efac]">Valor Total: <strong id="totalPreco">R$ 60,00</strong></span>
+        <div class="col-span-2 sm:col-span-1 bg-[#162018] border border-[#324534] rounded-xl p-3 flex flex-col items-center justify-center text-center">
+          <span class="text-[10px] text-[#86efac] font-bold uppercase tracking-wider">Total Faturado</span>
+          <span id="metricTotalFaturado" class="text-xl font-black text-white font-mono mt-1">R$ 0</span>
         </div>
       </div>
 
-      <!-- Botão Direto para o WhatsApp -->
-      <a 
-        id="btnWhatsApp"
-        href="#" 
-        target="_blank"
-        class="w-full py-4 px-4 bg-[#25D366] hover:bg-[#20ba59] active:scale-[0.98] text-[#052e16] font-extrabold text-sm sm:text-base rounded-xl shadow-xl hover:shadow-green-900/40 transition-all flex items-center justify-center gap-2 text-center"
-      >
-        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-        <span id="btnText">ENCOMENDAR PELO WHATSAPP</span>
-      </a>
+      <!-- Barra de Filtros e Busca -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 bg-[#0e1410] p-2.5 rounded-xl border border-[#263528]">
+        <!-- Abas de Filtro de Status -->
+        <div class="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 text-xs font-bold">
+          <button type="button" onclick="setAdminFilter('todos')" id="filter-todos" class="admin-filter-btn px-2.5 py-1.5 rounded-lg bg-[#233827] text-[#86efac] border border-[#3b593f] whitespace-nowrap cursor-pointer">
+            Todos (<span id="countFilterTodos">0</span>)
+          </button>
+          <button type="button" onclick="setAdminFilter('a_fazer')" id="filter-a_fazer" class="admin-filter-btn px-2.5 py-1.5 rounded-lg bg-[#162018] text-gray-400 border border-[#263528] hover:text-amber-400 whitespace-nowrap cursor-pointer">
+            🟡 A Fazer (<span id="countFilterAFazer">0</span>)
+          </button>
+          <button type="button" onclick="setAdminFilter('em_producao')" id="filter-em_producao" class="admin-filter-btn px-2.5 py-1.5 rounded-lg bg-[#162018] text-gray-400 border border-[#263528] hover:text-cyan-400 whitespace-nowrap cursor-pointer">
+            🔵 Bordando (<span id="countFilterEmProducao">0</span>)
+          </button>
+          <button type="button" onclick="setAdminFilter('pronto')" id="filter-pronto" class="admin-filter-btn px-2.5 py-1.5 rounded-lg bg-[#162018] text-gray-400 border border-[#263528] hover:text-lime-400 whitespace-nowrap cursor-pointer">
+            🟢 Prontos (<span id="countFilterPronto">0</span>)
+          </button>
+          <button type="button" onclick="setAdminFilter('entregue')" id="filter-entregue" class="admin-filter-btn px-2.5 py-1.5 rounded-lg bg-[#162018] text-gray-400 border border-[#263528] hover:text-gray-200 whitespace-nowrap cursor-pointer">
+            ✔️ Entregues (<span id="countFilterEntregue">0</span>)
+          </button>
+        </div>
 
-      <div class="text-center text-xs text-gray-400">
-        WhatsApp Direto: <strong class="text-white">(42) 99953-8715</strong> • Evolução Militar
+        <!-- Campo de Busca em Tempo Real -->
+        <div class="relative min-w-[200px]">
+          <input 
+            id="adminSearchInput" 
+            type="text" 
+            oninput="renderAdminOrders()" 
+            placeholder="🔍 Buscar aluno, cliente..." 
+            class="w-full bg-[#162018] border border-[#263528] rounded-lg px-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-lime-500 font-sans"
+          />
+        </div>
+      </div>
+
+      <!-- Lista de Pedidos da Produção (Cards Operacionais) -->
+      <div id="adminOrdersContainer" class="space-y-3">
+        <!-- Injetado dinamicamente via renderAdminOrders() -->
+      </div>
+
+      <!-- Rodapé do Painel Admin -->
+      <div class="pt-4 border-t border-[#202c22] flex items-center justify-between text-xs text-gray-400">
+        <button 
+          type="button" 
+          onclick="switchTab('simulador')" 
+          class="text-lime-400 hover:underline flex items-center gap-1 cursor-pointer font-bold"
+        >
+          <span>←</span>
+          <span>Voltar ao Simulador da Loja</span>
+        </button>
+        <span>Evolução Militar • Painel de Controle</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ================================================================ -->
+  <!--             MODAL DE SENHA DO ADMIN (SENHA: 104832)              -->
+  <!-- ================================================================ -->
+  <div id="modalSenhaAdmin" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#131a15] border border-[#2a382c] rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+      <div class="text-center space-y-1">
+        <div class="w-12 h-12 rounded-full bg-[#1c291e] border border-[#344d37] text-amber-400 flex items-center justify-center mx-auto text-xl">
+          🔒
+        </div>
+        <h3 class="text-base font-black text-white uppercase tracking-wider">Acesso Restrito à Produção</h3>
+        <p class="text-xs text-gray-400">Digite a senha de 6 dígitos para acessar o painel de pedidos:</p>
+      </div>
+
+      <div>
+        <input 
+          id="inputSenhaAdmin" 
+          type="password" 
+          inputmode="numeric" 
+          maxlength="6" 
+          placeholder="••••••" 
+          class="w-full bg-[#0a0f0c] border border-[#2a382c] rounded-xl px-4 py-3 text-center text-xl tracking-[8px] font-mono font-bold text-white focus:outline-none focus:border-amber-400 transition-all"
+          onkeydown="if(event.key === 'Enter') submitAdminPassword()"
+        />
+        <div id="msgErroSenha" class="text-red-400 text-xs font-semibold text-center mt-2 hidden">
+          ⚠️ Senha incorreta! Tente novamente.
+        </div>
+      </div>
+
+      <div class="flex gap-2">
+        <button 
+          type="button" 
+          onclick="closeAdminPasswordModal()" 
+          class="flex-1 py-2.5 rounded-xl text-xs font-bold bg-[#1c261e] border border-[#2a382c] text-gray-300 hover:bg-[#253328] cursor-pointer"
+        >
+          Cancelar
+        </button>
+        <button 
+          type="button" 
+          onclick="submitAdminPassword()" 
+          class="flex-1 py-2.5 rounded-xl text-xs font-extrabold bg-[#f0c20a] hover:bg-[#d4ac09] text-black shadow-lg cursor-pointer"
+        >
+          Entrar no Painel
+        </button>
       </div>
     </div>
   </div>
 
+  <!-- ================================================================ -->
+  <!--             MODAL NOVO PEDIDO / COLAR DO WHATSAPP                -->
+  <!-- ================================================================ -->
+  <div id="modalNovoPedido" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#131a15] border border-[#2a382c] rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-[#2a382c] pb-3">
+        <h3 class="text-sm sm:text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
+          <span>➕</span>
+          <span>Adicionar Pedido à Produção</span>
+        </h3>
+        <button onclick="closeNovoPedidoModal()" class="text-gray-400 hover:text-white text-lg cursor-pointer">✕</button>
+      </div>
+
+      <!-- Abas do Modal -->
+      <div class="flex border-b border-[#2a382c] text-xs font-bold">
+        <button id="tabModalColar" type="button" onclick="switchModalTab('colar')" class="py-2 px-3 border-b-2 border-lime-400 text-lime-400 cursor-pointer">
+          📋 Colar do WhatsApp
+        </button>
+        <button id="tabModalManual" type="button" onclick="switchModalTab('manual')" class="py-2 px-3 border-b-2 border-transparent text-gray-400 hover:text-white cursor-pointer">
+          ✍️ Cadastro Manual
+        </button>
+      </div>
+
+      <!-- Conteúdo 1: Colar Texto do WhatsApp -->
+      <div id="conteudoModalColar" class="space-y-3">
+        <p class="text-xs text-gray-400 leading-relaxed">
+          Cole abaixo a mensagem recebida do cliente no WhatsApp. O sistema detectará automaticamente o aluno, as biribas e divisas:
+        </p>
+        <textarea 
+          id="textareaWhatsApp" 
+          rows="5" 
+          placeholder="Cole aqui a mensagem do cliente (ex: 'Olá! Gostaria de encomendar bordados para Colégio Militar...')" 
+          class="w-full bg-[#0a0f0c] border border-[#2a382c] rounded-xl p-3 text-xs text-gray-200 placeholder-gray-500 font-mono focus:outline-none focus:border-lime-500"
+        ></textarea>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] text-gray-400 mb-1">Nome do Responsável / Cliente:</label>
+            <input id="quickClienteNome" type="text" placeholder="Ex: Juliana Santos" class="w-full bg-[#0a0f0c] border border-[#2a382c] rounded-lg p-2 text-xs text-white focus:outline-none focus:border-lime-500 font-sans" />
+          </div>
+          <div>
+            <label class="block text-[10px] text-gray-400 mb-1">WhatsApp do Cliente (com DDD):</label>
+            <input id="quickClienteTelefone" type="tel" placeholder="Ex: (42) 99999-0000" class="w-full bg-[#0a0f0c] border border-[#2a382c] rounded-lg p-2 text-xs text-white focus:outline-none focus:border-lime-500 font-mono" />
+          </div>
+        </div>
+
+        <button 
+          type="button" 
+          onclick="processarTextoWhatsApp()" 
+          class="w-full py-2.5 bg-[#233827] hover:bg-[#344d37] border border-[#3b593f] text-[#86efac] font-bold rounded-xl text-xs transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+        >
+          <span>⚡</span>
+          <span>Processar Texto e Cadastrar na Fila</span>
+        </button>
+      </div>
+
+      <!-- Conteúdo 2: Cadastro Manual -->
+      <div id="conteudoModalManual" class="space-y-3 hidden">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] text-gray-400 mb-1">Nome a Bordar (Aluno/Aluna):</label>
+            <input id="manAlunoNome" type="text" placeholder="Ex: ALUNA MONIQUE" class="w-full bg-[#0a0f0c] border border-[#2a382c] rounded-lg p-2 text-xs text-white uppercase font-bold focus:outline-none focus:border-lime-500" />
+          </div>
+          <div>
+            <label class="block text-[10px] text-gray-400 mb-1">Nome do Cliente:</label>
+            <input id="manClienteNome" type="text" placeholder="Ex: Juliana Santos" class="w-full bg-[#0a0f0c] border border-[#2a382c] rounded-lg p-2 text-xs text-white focus:outline-none focus:border-lime-500" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[10px] text-gray-400 mb-1">WhatsApp para Aviso (com DDD):</label>
+          <input id="manClienteTelefone" type="tel" placeholder="Ex: (42) 99999-0000" class="w-full bg-[#0a0f0c] border border-[#2a382c] rounded-lg p-2 text-xs text-white font-mono focus:outline-none focus:border-lime-500" />
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-[#2a382c]">
+          <div>
+            <label class="block text-[10px] text-gray-400 mb-1">Biriba Agasalho:</label>
+            <input id="manQtyAgasalho" type="number" min="0" value="0" class="w-full bg-[#0a0f0c] border border-[#2a382c] rounded-lg p-2 text-xs text-white text-center font-bold" />
+          </div>
+          <div>
+            <label class="block text-[10px] text-gray-400 mb-1">Biriba Farda:</label>
+            <input id="manQtyFarda" type="number" min="0" value="0" class="w-full bg-[#0a0f0c] border border-[#2a382c] rounded-lg p-2 text-xs text-white text-center font-bold" />
+          </div>
+          <div>
+            <label class="block text-[10px] text-gray-400 mb-1">Divisa Série (Nº):</label>
+            <select id="manSerie" class="w-full bg-[#0a0f0c] border border-[#2a382c] rounded-lg p-2 text-xs text-white font-bold">
+              <option value="6">6º Ano</option>
+              <option value="7">7º Ano</option>
+              <option value="8">8º Ano</option>
+              <option value="9">9º Ano</option>
+              <option value="1" selected>1º Ano (Médio)</option>
+              <option value="2">2º Ano (Médio)</option>
+              <option value="3">3º Ano (Médio)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] text-gray-400 mb-1">Turno:</label>
+            <select id="manTurno" class="w-full bg-[#0a0f0c] border border-[#2a382c] rounded-lg p-2 text-xs text-white font-bold">
+              <option value="MANHA" selected>MANHÃ (Azul)</option>
+              <option value="TARDE">TARDE (Vermelho)</option>
+            </select>
+          </div>
+        </div>
+
+        <button 
+          type="button" 
+          onclick="salvarPedidoManual()" 
+          class="w-full py-2.5 bg-[#233827] hover:bg-[#344d37] border border-[#3b593f] text-[#86efac] font-bold rounded-xl text-xs transition-all shadow-md mt-2 cursor-pointer"
+        >
+          💾 Cadastrar Pedido na Fila
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================ -->
+  <!--        NOVO MODAL: RELATÓRIO DE PRODUÇÃO (FEITOS x A BORDAR)      -->
+  <!-- ================================================================ -->
+  <div id="modalRelatorio" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
+    <div class="bg-[#131a15] border border-[#2a382c] rounded-2xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+      
+      <!-- Topo do Relatório -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2a382c] pb-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl">📊</span>
+            <h3 class="text-base sm:text-lg font-black text-white uppercase tracking-wider">
+              RELATÓRIO DE PRODUÇÃO & BORDADOS CPM
+            </h3>
+          </div>
+          <p class="text-xs text-gray-400 font-mono mt-0.5">
+            Consolidado por Data • Produtos Confeccionados vs Produtos Para Bordar
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button 
+            type="button" 
+            onclick="imprimirRelatorioGeral()" 
+            class="px-3 py-1.5 bg-[#172d3f] hover:bg-[#1e3c54] text-cyan-300 border border-cyan-800 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+          >
+            <span>🖨️</span>
+            <span>Imprimir Relatório (A4)</span>
+          </button>
+
+          <button 
+            type="button" 
+            onclick="copiarResumoRelatorioWhatsApp()" 
+            class="px-3 py-1.5 bg-[#233827] hover:bg-[#344d37] text-lime-300 border border-lime-800 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+          >
+            <span>📲</span>
+            <span>Copiar WhatsApp</span>
+          </button>
+
+          <button onclick="closeRelatorioModal()" class="text-gray-400 hover:text-white text-xl p-1 cursor-pointer">✕</button>
+        </div>
+      </div>
+
+      <!-- Filtro de Período e Datas -->
+      <div class="bg-[#0b0f0c] p-3 rounded-xl border border-[#202c22] flex flex-wrap items-center justify-between gap-2.5">
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span class="text-xs font-bold text-gray-400 mr-1">Filtrar Data:</span>
+          <button type="button" onclick="setReportPeriod('todos')" id="rep-btn-todos" class="report-period-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-[#233827] text-[#86efac] border border-[#3b593f] cursor-pointer">Todos</button>
+          <button type="button" onclick="setReportPeriod('hoje')" id="rep-btn-hoje" class="report-period-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-[#162018] text-gray-400 border border-[#263528] hover:text-white cursor-pointer">📅 Hoje</button>
+          <button type="button" onclick="setReportPeriod('7dias')" id="rep-btn-7dias" class="report-period-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-[#162018] text-gray-400 border border-[#263528] hover:text-white cursor-pointer">📆 Últimos 7 dias</button>
+          <button type="button" onclick="setReportPeriod('mes')" id="rep-btn-mes" class="report-period-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-[#162018] text-gray-400 border border-[#263528] hover:text-white cursor-pointer">🗓️ Este Mês</button>
+          <button type="button" onclick="setReportPeriod('custom')" id="rep-btn-custom" class="report-period-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-[#162018] text-gray-400 border border-[#263528] hover:text-white cursor-pointer">🔍 Período</button>
+        </div>
+
+        <div id="repCustomDateBox" class="hidden items-center gap-2 text-xs">
+          <span class="text-gray-400">De:</span>
+          <input type="date" id="repDataInicio" onchange="renderRelatorio()" class="bg-[#162018] border border-[#263528] text-white rounded p-1 text-xs" />
+          <span class="text-gray-400">Até:</span>
+          <input type="date" id="repDataFim" onchange="renderRelatorio()" class="bg-[#162018] border border-[#263528] text-white rounded p-1 text-xs" />
+        </div>
+      </div>
+
+      <!-- Resumo Geral em Números do Período -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="bg-[#1c1810] border border-[#4a3b1a] rounded-xl p-3.5 text-center">
+          <span class="text-xs font-bold text-amber-400 uppercase tracking-wide block">⏳ Total de Peças Para Bordar</span>
+          <span id="repTotalParaBordar" class="text-2xl sm:text-3xl font-black text-amber-300 font-mono mt-1 block">0 un</span>
+          <span id="repDescParaBordar" class="text-[10px] text-gray-400 mt-0.5 block">0 pedidos na fila</span>
+        </div>
+
+        <div class="bg-[#101c13] border border-[#1d4224] rounded-xl p-3.5 text-center">
+          <span class="text-xs font-bold text-lime-400 uppercase tracking-wide block">✅ Total de Peças Feitas / Concluídas</span>
+          <span id="repTotalFeitas" class="text-2xl sm:text-3xl font-black text-lime-300 font-mono mt-1 block">0 un</span>
+          <span id="repDescFeitas" class="text-[10px] text-gray-400 mt-0.5 block">0 pedidos prontos ou entregues</span>
+        </div>
+
+        <div class="bg-[#162018] border border-[#2f4233] rounded-xl p-3.5 text-center">
+          <span class="text-xs font-bold text-white uppercase tracking-wide block">💰 Faturamento Total do Período</span>
+          <span id="repFaturamento" class="text-2xl sm:text-3xl font-black text-[#86efac] font-mono mt-1 block">R$ 0,00</span>
+          <span id="repTotalGeralItens" class="text-[10px] text-gray-400 mt-0.5 block">0 peças totais</span>
+        </div>
+      </div>
+
+      <!-- Duas Colunas Comparativas: O Que Está Para Bordar vs O Que Já Foi Feito -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- COLUNA 1: PRODUTOS PARA BORDAR (PENDENTES) -->
+        <div class="bg-[#0e1410] border border-[#3d2f13] rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between border-b border-[#2d220e] pb-2">
+            <h4 class="text-xs sm:text-sm font-black text-amber-400 uppercase tracking-wide flex items-center gap-1.5">
+              <span>⏳</span>
+              <span>1. PRODUTOS PARA BORDAR (FILA + BORDANDO)</span>
+            </h4>
+            <span id="repBadgeCountPendentes" class="px-2 py-0.5 bg-amber-950 text-amber-300 border border-amber-800 text-[10px] font-mono rounded font-bold">0 un</span>
+          </div>
+
+          <!-- Grade Quantitativa dos Modelos Para Bordar -->
+          <div id="repGradeParaBordar" class="grid grid-cols-2 gap-2 text-xs">
+            <!-- Preenchido via JS -->
+          </div>
+
+          <!-- Lista dos Alunos e Pedidos na Fila -->
+          <div class="space-y-1.5 pt-1">
+            <span class="text-[10px] text-gray-400 uppercase font-mono block">Relação de Alunos na Fila de Confecção:</span>
+            <div id="repListaAlunosParaBordar" class="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+              <!-- Preenchido via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- COLUNA 2: PRODUTOS JÁ CONFECCIONADOS (FEITOS) -->
+        <div class="bg-[#0e1410] border border-[#1b3d22] rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between border-b border-[#142d1a] pb-2">
+            <h4 class="text-xs sm:text-sm font-black text-lime-400 uppercase tracking-wide flex items-center gap-1.5">
+              <span>✅</span>
+              <span>2. PRODUTOS FEITOS (PRONTOS + ENTREGUES)</span>
+            </h4>
+            <span id="repBadgeCountFeitos" class="px-2 py-0.5 bg-lime-950 text-lime-300 border border-lime-800 text-[10px] font-mono rounded font-bold">0 un</span>
+          </div>
+
+          <!-- Grade Quantitativa dos Modelos Feitos -->
+          <div id="repGradeFeitos" class="grid grid-cols-2 gap-2 text-xs">
+            <!-- Preenchido via JS -->
+          </div>
+
+          <!-- Lista dos Alunos com Bordados Concluídos -->
+          <div class="space-y-1.5 pt-1">
+            <span class="text-[10px] text-gray-400 uppercase font-mono block">Relação de Alunos Confeccionados:</span>
+            <div id="repListaAlunosFeitos" class="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+              <!-- Preenchido via JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================================================================ -->
+  <!--           NOVO MODAL: BAIXAR E INSTALAR O APLICATIVO             -->
+  <!-- ================================================================ -->
+  <div id="modalInstalarApp" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
+    <div class="bg-[#131a15] border border-[#2a382c] rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+      
+      <!-- Topo do Modal -->
+      <div class="flex items-center justify-between border-b border-[#2a382c] pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-[#203023] border border-[#3c5540] flex items-center justify-center text-2xl shadow-sm flex-shrink-0">
+            📱
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-black text-white uppercase tracking-wider">
+              BAIXAR / INSTALAR APLICATIVO
+            </h3>
+            <p class="text-xs text-lime-400 font-mono">
+              Evolução Militar • Bordados CPM
+            </p>
+          </div>
+        </div>
+        <button onclick="fecharModalInstalacao()" class="text-gray-400 hover:text-white text-xl p-1 cursor-pointer">✕</button>
+      </div>
+
+      <!-- Abas de Opções do Modal -->
+      <div class="flex border-b border-[#2a382c] text-xs font-bold gap-1">
+        <button id="tabInstalador" type="button" onclick="switchAppTab('instalar')" class="py-2 px-3 border-b-2 border-lime-400 text-lime-400 cursor-pointer">
+          📲 Instalar no Aparelho
+        </button>
+        <button id="tabOffline" type="button" onclick="switchAppTab('offline')" class="py-2 px-3 border-b-2 border-transparent text-gray-400 hover:text-white cursor-pointer">
+          💾 Baixar Offline (.html)
+        </button>
+        <button id="tabApk" type="button" onclick="switchAppTab('apk')" class="py-2 px-3 border-b-2 border-transparent text-gray-400 hover:text-white cursor-pointer">
+          🤖 Gerar APK
+        </button>
+      </div>
+
+      <!-- ABA 1: Instalar no Aparelho (Android / iPhone / PC) -->
+      <div id="conteudoAppInstalar" class="space-y-3.5">
+        
+        <!-- Botão de Ação Direta para Android e PC -->
+        <div id="boxInstalarAndroidPC" class="bg-[#18231b] border border-[#2d4431] rounded-xl p-4 text-center space-y-3">
+          <div class="flex items-center justify-center gap-2 text-lime-400 font-bold text-xs uppercase tracking-wider">
+            <span>⚡</span>
+            <span>Instalação Rápida em 1 Clique</span>
+          </div>
+
+          <p class="text-xs text-gray-300 leading-relaxed">
+            Instale o app direto no seu celular Android ou computador. Ele fica salvo na sua tela inicial com ícone oficial, abre em tela cheia e funciona mesmo sem internet!
+          </p>
+
+          <button 
+            type="button" 
+            onclick="executarInstalacaoNativa()" 
+            id="btnTriggerNativeInstall" 
+            class="w-full py-3.5 px-4 bg-[#25D366] hover:bg-[#20ba59] active:scale-95 text-[#052e16] font-black text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <span>📲</span>
+            <span id="btnTriggerLabel">INSTALAR APLICATIVO AGORA</span>
+          </button>
+
+          <span class="text-[10px] text-gray-400 block font-mono">
+            Não ocupa memória do celular • Sem taxas • 100% Seguro
+          </span>
+        </div>
+
+        <!-- Instruções Especiais para iPhone / iPad (iOS Safari) -->
+        <div class="bg-[#0e1410] border border-[#263528] rounded-xl p-4 space-y-2.5">
+          <div class="flex items-center gap-2 text-xs font-black text-white uppercase tracking-wider">
+            <span>🍎</span>
+            <span>Como Instalar no iPhone ou iPad (iOS Safari):</span>
+          </div>
+
+          <div class="space-y-2 text-xs text-gray-300">
+            <div class="flex items-start gap-2.5 bg-[#141d16] p-2.5 rounded-lg border border-[#243327]">
+              <span class="w-5 h-5 rounded-full bg-[#203023] text-lime-400 font-bold flex items-center justify-center text-[11px] flex-shrink-0">1</span>
+              <span>No navegador <strong>Safari</strong> do iPhone, toque no botão <strong>Compartilhar</strong> (ícone do quadrado com seta para cima <strong class="text-lime-300 text-sm">⎋</strong> na barra inferior).</span>
+            </div>
+
+            <div class="flex items-start gap-2.5 bg-[#141d16] p-2.5 rounded-lg border border-[#243327]">
+              <span class="w-5 h-5 rounded-full bg-[#203023] text-lime-400 font-bold flex items-center justify-center text-[11px] flex-shrink-0">2</span>
+              <span>Role a lista para baixo e toque em <strong>"Adicionar à Tela de Início"</strong> (ícone <strong class="text-lime-300 text-sm">➕</strong>).</span>
+            </div>
+
+            <div class="flex items-start gap-2.5 bg-[#141d16] p-2.5 rounded-lg border border-[#243327]">
+              <span class="w-5 h-5 rounded-full bg-[#203023] text-lime-400 font-bold flex items-center justify-center text-[11px] flex-shrink-0">3</span>
+              <span>Toque em <strong>"Adicionar"</strong> no canto superior direito. Pronto! O app aparecerá na tela do seu celular como um app nativo.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ABA 2: Baixar Arquivo Único Offline (.html) -->
+      <div id="conteudoAppOffline" class="space-y-3.5 hidden">
+        <div class="bg-[#18231b] border border-[#2d4431] rounded-xl p-4 space-y-3">
+          <div class="flex items-center gap-2 text-xs font-black text-white uppercase tracking-wider">
+            <span>💾</span>
+            <span>Baixar Programa Completo em Arquivo Offline (.html)</span>
+          </div>
+
+          <p class="text-xs text-gray-300 leading-relaxed">
+            Se você preferir ter o arquivo do programa salvo no seu computador, celular ou pen drive para abrir em qualquer lugar (mesmo 100% desconectado da internet), clique no botão abaixo:
+          </p>
+
+          <button 
+            type="button" 
+            onclick="baixarAppOffline()" 
+            class="w-full py-3.5 px-4 bg-[#1c2a38] hover:bg-[#25384d] border border-cyan-800 text-cyan-300 font-black text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <span>📥</span>
+            <span>BAIXAR ARQUIVO COMPLETO (.HTML)</span>
+          </button>
+
+          <div class="text-[11px] text-gray-400 space-y-1 bg-[#0c120e] p-3 rounded-lg border border-[#223126]">
+            <div>✔️ <strong>Sem necessidade de internet:</strong> Abre com 2 cliques em qualquer navegador.</div>
+            <div>✔️ <strong>Salva pedidos localmente:</strong> Mantém todos os pedidos da produção gravados no seu aparelho.</div>
+            <div>✔️ <strong>Gera pedidos no WhatsApp:</strong> Abre o WhatsApp diretamente com os dados preenchidos.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABA 3: Gerar APK para Android (PWABuilder) -->
+      <div id="conteudoAppApk" class="space-y-3.5 hidden">
+        <div class="bg-[#18231b] border border-[#2d4431] rounded-xl p-4 space-y-3">
+          <div class="flex items-center gap-2 text-xs font-black text-white uppercase tracking-wider">
+            <span>🤖</span>
+            <span>Como Gerar o Instalador APK para Android</span>
+          </div>
+
+          <p class="text-xs text-gray-300 leading-relaxed">
+            Como este sistema já foi construído com suporte completo a <strong>PWA (Progressive Web App)</strong>, você pode transformá-lo em um instalador <strong>.apk</strong> para Android em menos de 1 minuto usando o serviço oficial da Microsoft (PWABuilder):
+          </p>
+
+          <ol class="space-y-2 text-xs text-gray-300 list-decimal pl-4">
+            <li>Copie o link do seu aplicativo no GitHub Pages ou site.</li>
+            <li>Acesse o site gratuito: <a href="https://www.pwabuilder.com" target="_blank" class="text-lime-400 underline font-bold">www.pwabuilder.com</a></li>
+            <li>Cole o link do seu site e clique em <strong>"Start"</strong>.</li>
+            <li>O site verificará o manifest e o Service Worker (que já estão 100% configurados).</li>
+            <li>Clique em <strong>"Package for Android"</strong> para baixar o arquivo <strong>.apk</strong> pronto para instalar ou enviar para seus clientes!</li>
+          </ol>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT: LÓGICA DO SIMULADOR E PAINEL ADMIN -->
   <script>
+    const ADMIN_PASSWORD = "104832";
+    const STORAGE_KEY = "cpm_pedidos_producao";
+
     let currentModelo = 'AGASALHO';
     let currentPosto = 'ALUNA';
     let currentSerie = '1';
     let currentTurno = 'MANHA'; // 'MANHA' ou 'TARDE'
     
-    let qtyAgasalho = 1;
-    let qtyFarda = 1;
-    let qtyDivisa = 1;
-    let qtyTurno = 1;
+    // QUANTIDADES INICIAIS ZERADAS A PEDIDO DO CLIENTE
+    let qtyAgasalho = 0;
+    let qtyFarda = 0;
+    let qtyDivisa = 0;
+    let qtyTurno = 0;
+
+    let adminFilterStatus = 'todos'; // 'todos', 'a_fazer', 'em_producao', 'pronto', 'entregue'
+    let reportPeriod = 'todos'; // 'todos', 'hoje', '7dias', 'mes', 'custom'
 
     const serieLabels = {
       '6': '6º Ano (Fundamental)',
@@ -572,6 +1330,1173 @@
       '3': '3º Ano (Ensino Médio)'
     };
 
+    // ==========================================
+    // NAVEGAÇÃO DE ABAS & SEGURANÇA ADMIN
+    // ==========================================
+    function switchTab(tab) {
+      const container = document.getElementById('mainAppContainer');
+      const viewSimulador = document.getElementById('viewSimulador');
+      const viewAdmin = document.getElementById('viewAdmin');
+
+      if (tab === 'admin') {
+        const isAuth = sessionStorage.getItem('cpm_admin_auth') === ADMIN_PASSWORD;
+        if (!isAuth) {
+          openAdminPasswordModal();
+          return;
+        }
+
+        // Expandir container para visualização gerencial da produção
+        container.className = "max-w-5xl w-full bg-[#131a15] border border-[#2a382c] rounded-2xl shadow-2xl overflow-hidden mx-auto my-2 sm:my-4 transition-all duration-300";
+        viewSimulador.classList.add('hidden');
+        viewAdmin.classList.remove('hidden');
+
+        renderAdminOrders();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        // Reduzir container para modo simulador do cliente
+        container.className = "max-w-md w-full bg-[#131a15] border border-[#2a382c] rounded-2xl shadow-2xl overflow-hidden mx-auto my-2 sm:my-4 transition-all duration-300";
+        viewSimulador.classList.remove('hidden');
+        viewAdmin.classList.add('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function openAdminPasswordModal() {
+      const modal = document.getElementById('modalSenhaAdmin');
+      const input = document.getElementById('inputSenhaAdmin');
+      const erro = document.getElementById('msgErroSenha');
+      erro.classList.add('hidden');
+      input.value = '';
+      modal.classList.remove('hidden');
+      setTimeout(() => input.focus(), 100);
+    }
+
+    function closeAdminPasswordModal() {
+      document.getElementById('modalSenhaAdmin').classList.add('hidden');
+    }
+
+    function submitAdminPassword() {
+      const input = document.getElementById('inputSenhaAdmin');
+      const erro = document.getElementById('msgErroSenha');
+
+      if (input.value.trim() === ADMIN_PASSWORD) {
+        sessionStorage.setItem('cpm_admin_auth', ADMIN_PASSWORD);
+        closeAdminPasswordModal();
+        showToast("🔓 Acesso autorizado ao Setor de Produção!", "success");
+        switchTab('admin');
+      } else {
+        erro.classList.remove('hidden');
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    function adminLogout() {
+      sessionStorage.removeItem('cpm_admin_auth');
+      showToast("🔒 Painel Admin bloqueado com segurança.", "info");
+      switchTab('simulador');
+    }
+
+    // ==========================================
+    // TOAST NOTIFICAÇÃO
+    // ==========================================
+    let toastTimer = null;
+    function showToast(mensagem, tipo = 'success') {
+      const toast = document.getElementById('toastNotification');
+      const text = document.getElementById('toastText');
+      const icon = document.getElementById('toastIcon');
+
+      clearTimeout(toastTimer);
+      text.textContent = mensagem;
+
+      if (tipo === 'success') {
+        icon.textContent = '✅';
+        toast.className = "fixed top-4 right-4 z-50 transform transition-all duration-300 translate-y-0 opacity-100 bg-[#131d16] border border-[#344d37] text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 max-w-sm";
+      } else if (tipo === 'info') {
+        icon.textContent = 'ℹ️';
+        toast.className = "fixed top-4 right-4 z-50 transform transition-all duration-300 translate-y-0 opacity-100 bg-[#111923] border border-[#223954] text-cyan-200 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 max-w-sm";
+      } else {
+        icon.textContent = '⚠️';
+        toast.className = "fixed top-4 right-4 z-50 transform transition-all duration-300 translate-y-0 opacity-100 bg-[#291414] border border-[#522929] text-red-200 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 max-w-sm";
+      }
+
+      toastTimer = setTimeout(() => {
+        toast.className = "fixed top-4 right-4 z-50 transform transition-all duration-300 translate-y-[-100px] opacity-0 pointer-events-none bg-[#131d16] border border-[#344d37] text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 max-w-sm";
+      }, 3500);
+    }
+
+    // ==========================================
+    // BANCO DE DADOS LOCAL (LOCALSTORAGE)
+    // ==========================================
+    function getStoredOrders() {
+      try {
+        const data = localStorage.getItem(STORAGE_KEY);
+        if (!data) {
+          const exemplosIniciais = [
+            {
+              id: 'EM-1081',
+              data: new Date(Date.now() - 3600000 * 2).toISOString(),
+              dataFormatada: 'Hoje às 09:30',
+              clienteNome: 'Juliana Szesz',
+              clienteTelefone: '42999538715',
+              alunoNome: 'ALUNA MONIQUE',
+              qtyAgasalho: 2,
+              qtyFarda: 1,
+              qtyDivisa: 1,
+              serie: '1',
+              qtyTurno: 1,
+              turno: 'MANHA',
+              totalQtd: 5,
+              valorTotal: 80,
+              status: 'pronto',
+              notificadoWhatsapp: false,
+              notificadoEm: null
+            },
+            {
+              id: 'EM-1082',
+              data: new Date(Date.now() - 3600000 * 5).toISOString(),
+              dataFormatada: 'Hoje às 08:15',
+              clienteNome: 'Carlos Henrique',
+              clienteTelefone: '4299881234',
+              alunoNome: 'ALUNO HENRIQUE',
+              qtyAgasalho: 1,
+              qtyFarda: 1,
+              qtyDivisa: 1,
+              serie: '8',
+              qtyTurno: 1,
+              turno: 'TARDE',
+              totalQtd: 4,
+              valorTotal: 60,
+              status: 'em_producao',
+              notificadoWhatsapp: false,
+              notificadoEm: null
+            },
+            {
+              id: 'EM-1083',
+              data: new Date(Date.now() - 3600000 * 8).toISOString(),
+              dataFormatada: 'Ontem às 17:40',
+              clienteNome: 'Mariana Ribeiro',
+              clienteTelefone: '4299112233',
+              alunoNome: 'ALUNA ISABELA',
+              qtyAgasalho: 2,
+              qtyFarda: 2,
+              qtyDivisa: 0,
+              serie: '1',
+              qtyTurno: 0,
+              turno: 'MANHA',
+              totalQtd: 4,
+              valorTotal: 80,
+              status: 'a_fazer',
+              notificadoWhatsapp: false,
+              notificadoEm: null
+            }
+          ];
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(exemplosIniciais));
+          return exemplosIniciais;
+        }
+        return JSON.parse(data);
+      } catch (e) {
+        console.error("Erro ao ler localStorage", e);
+        return [];
+      }
+    }
+
+    function saveOrders(orders) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
+      } catch (e) {
+        console.error("Erro ao salvar localStorage", e);
+      }
+    }
+
+    // ==========================================
+    // RENDERIZAÇÃO DA PRODUÇÃO & ADMIN
+    // ==========================================
+    function setAdminFilter(status) {
+      adminFilterStatus = status;
+      document.querySelectorAll('.admin-filter-btn').forEach(btn => {
+        btn.className = "admin-filter-btn px-2.5 py-1.5 rounded-lg bg-[#162018] text-gray-400 border border-[#263528] hover:text-white whitespace-nowrap cursor-pointer";
+      });
+
+      const activeBtn = document.getElementById(`filter-${status}`);
+      if (activeBtn) {
+        if (status === 'a_fazer') activeBtn.className = "admin-filter-btn px-2.5 py-1.5 rounded-lg bg-[#3b2d12] text-amber-300 border border-amber-600/60 whitespace-nowrap cursor-pointer";
+        else if (status === 'em_producao') activeBtn.className = "admin-filter-btn px-2.5 py-1.5 rounded-lg bg-[#12283b] text-cyan-300 border border-cyan-600/60 whitespace-nowrap cursor-pointer";
+        else if (status === 'pronto') activeBtn.className = "admin-filter-btn px-2.5 py-1.5 rounded-lg bg-[#1c3822] text-lime-300 border border-lime-600/60 whitespace-nowrap cursor-pointer";
+        else if (status === 'entregue') activeBtn.className = "admin-filter-btn px-2.5 py-1.5 rounded-lg bg-[#282d29] text-gray-200 border border-gray-500 whitespace-nowrap cursor-pointer";
+        else activeBtn.className = "admin-filter-btn px-2.5 py-1.5 rounded-lg bg-[#233827] text-[#86efac] border border-[#3b593f] whitespace-nowrap cursor-pointer";
+      }
+
+      renderAdminOrders();
+    }
+
+    function renderAdminOrders() {
+      const orders = getStoredOrders();
+      const container = document.getElementById('adminOrdersContainer');
+      const search = (document.getElementById('adminSearchInput').value || '').trim().toLowerCase();
+
+      // Métricas
+      let countAFazer = 0;
+      let countEmProducao = 0;
+      let countProntos = 0;
+      let countEntregues = 0;
+      let totalFaturamento = 0;
+
+      orders.forEach(o => {
+        if (o.status === 'a_fazer') countAFazer++;
+        else if (o.status === 'em_producao') countEmProducao++;
+        else if (o.status === 'pronto') countProntos++;
+        else if (o.status === 'entregue') countEntregues++;
+        totalFaturamento += (o.valorTotal || 0);
+      });
+
+      document.getElementById('metricAFazer').textContent = countAFazer;
+      document.getElementById('metricEmProducao').textContent = countEmProducao;
+      document.getElementById('metricProntos').textContent = countProntos;
+      document.getElementById('metricEntregues').textContent = countEntregues;
+      document.getElementById('metricTotalFaturado').textContent = `R$ ${totalFaturamento},00`;
+
+      document.getElementById('countFilterTodos').textContent = orders.length;
+      document.getElementById('countFilterAFazer').textContent = countAFazer;
+      document.getElementById('countFilterEmProducao').textContent = countEmProducao;
+      document.getElementById('countFilterPronto').textContent = countProntos;
+      document.getElementById('countFilterEntregue').textContent = countEntregues;
+
+      // Filtragem
+      let filtered = orders.filter(o => {
+        if (adminFilterStatus !== 'todos' && o.status !== adminFilterStatus) return false;
+        if (search) {
+          const matchAluno = (o.alunoNome || '').toLowerCase().includes(search);
+          const matchCliente = (o.clienteNome || '').toLowerCase().includes(search);
+          const matchTelefone = (o.clienteTelefone || '').toLowerCase().includes(search);
+          const matchId = (o.id || '').toLowerCase().includes(search);
+          return matchAluno || matchCliente || matchTelefone || matchId;
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="bg-[#0e1410] border border-[#263528] rounded-xl p-8 text-center space-y-2">
+            <span class="text-3xl">📭</span>
+            <div class="text-sm font-bold text-gray-300">Nenhum pedido encontrado nesta lista</div>
+            <p class="text-xs text-gray-500">Adicione um novo pedido ou alterne os filtros acima.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(order => {
+        let badgeStatus = '';
+        if (order.status === 'a_fazer') {
+          badgeStatus = `<span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-amber-950/80 text-amber-300 border border-amber-800/80">🟡 A Fazer (Fila)</span>`;
+        } else if (order.status === 'em_producao') {
+          badgeStatus = `<span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-cyan-950/80 text-cyan-300 border border-cyan-800/80">🔵 Bordando</span>`;
+        } else if (order.status === 'pronto') {
+          badgeStatus = `<span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-lime-950/90 text-lime-300 border border-lime-700">🟢 Pronto (Avisar Cliente)</span>`;
+        } else if (order.status === 'entregue') {
+          badgeStatus = `<span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-gray-800 text-gray-300 border border-gray-600">✔️ Entregue</span>`;
+        }
+
+        const cleanPhone = (order.clienteTelefone || '').replace(/\D/g, '');
+
+        let itensHtml = '';
+        if (order.qtyAgasalho > 0) {
+          itensHtml += `<div class="text-xs text-gray-200 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#132c8c]"></span><strong>${order.qtyAgasalho}x</strong> Biriba Agasalho (Branca/Azul)</div>`;
+        }
+        if (order.qtyFarda > 0) {
+          itensHtml += `<div class="text-xs text-gray-200 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#f0c20a]"></span><strong>${order.qtyFarda}x</strong> Biriba Farda (Cinza/Amarelo)</div>`;
+        }
+        if (order.qtyDivisa > 0) {
+          itensHtml += `<div class="text-xs text-gray-200 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span><strong>${order.qtyDivisa}x</strong> Divisa Série Nº ${order.serie || '1'} (${serieLabels[order.serie] || ''})</div>`;
+        }
+        if (order.qtyTurno > 0) {
+          const corTurno = order.turno === 'TARDE' ? 'Vermelho' : 'Azul Royal';
+          itensHtml += `<div class="text-xs text-gray-200 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full ${order.turno === 'TARDE' ? 'bg-[#dc2626]' : 'bg-[#132c8c]'}"></span><strong>${order.qtyTurno}x</strong> Divisa de Turno ${order.turno || 'MANHÃ'} (${corTurno})</div>`;
+        }
+
+        let actionsHtml = '';
+        if (order.status === 'a_fazer') {
+          actionsHtml = `
+            <button onclick="updateOrderStatus('${order.id}', 'em_producao')" class="py-2 px-3 bg-[#172d3f] hover:bg-[#1e3c54] text-cyan-300 border border-cyan-800 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer">
+              <span>⚙️</span> Iniciar Produção (Bordar)
+            </button>
+            <button onclick="updateOrderStatus('${order.id}', 'pronto')" class="py-2 px-3 bg-[#1e3822] hover:bg-[#284d2e] text-lime-300 border border-lime-800 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer">
+              <span>✅</span> Confeccionado (Pronto)
+            </button>
+          `;
+        } else if (order.status === 'em_producao') {
+          actionsHtml = `
+            <button onclick="updateOrderStatus('${order.id}', 'pronto')" class="py-2 px-3.5 bg-[#25D366] hover:bg-[#20ba59] text-black border border-green-400 rounded-lg text-xs font-black transition-all flex items-center gap-1 shadow-md cursor-pointer">
+              <span>✅</span> Confeccionado! (Mover para Pronto)
+            </button>
+            <button onclick="updateOrderStatus('${order.id}', 'a_fazer')" class="py-2 px-2.5 bg-[#1f2621] hover:bg-[#28332a] text-gray-300 border border-[#344637] rounded-lg text-xs font-bold transition-all cursor-pointer">
+              <span>↩️</span> Voltar p/ Fila
+            </button>
+          `;
+        } else if (order.status === 'pronto') {
+          actionsHtml = `
+            <button onclick="notificarClientePronto('${order.id}')" class="btn-pronto-pulse py-2.5 px-4 bg-[#25D366] hover:bg-[#20ba59] active:scale-95 text-black border-2 border-white/80 rounded-xl text-xs font-black transition-all flex items-center gap-2 shadow-xl cursor-pointer">
+              <span class="text-base">📲</span>
+              <span>AVISAR CLIENTE NO WHATSAPP QUE ESTÁ PRONTO!</span>
+            </button>
+            <button onclick="updateOrderStatus('${order.id}', 'entregue')" class="py-2 px-3 bg-[#1f2b21] hover:bg-[#2b3c2e] text-gray-200 border border-gray-600 rounded-lg text-xs font-bold transition-all cursor-pointer">
+              <span>✔️</span> Marcar Entregue
+            </button>
+          `;
+        } else if (order.status === 'entregue') {
+          actionsHtml = `
+            <span class="text-xs text-gray-400 font-mono flex items-center gap-1">✔️ Pedido Entregue e Concluído</span>
+            <button onclick="updateOrderStatus('${order.id}', 'pronto')" class="py-1 px-2.5 bg-[#172018] hover:bg-[#212f23] text-gray-400 hover:text-white border border-[#2a382c] rounded-md text-[11px] transition-all cursor-pointer">
+              Reabrir Pedido
+            </button>
+          `;
+        }
+
+        const notificadoTag = order.notificadoWhatsapp 
+          ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-green-950/80 text-green-300 border border-green-800">✅ Cliente avisado em ${order.notificadoEm || 'WhatsApp'}</span>`
+          : (order.status === 'pronto' ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-amber-950/80 text-amber-300 border border-amber-800 animate-pulse">⚠️ Aguardando envio de aviso</span>` : '');
+
+        return `
+          <div class="bg-[#111712] border border-[#2a382c] hover:border-[#3d5240] rounded-xl p-4 shadow-lg transition-all space-y-3">
+            <!-- Topo do Card -->
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#222e24] pb-2.5">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-black text-white font-mono bg-[#1c261e] px-2 py-0.5 rounded border border-[#2f4233]">${order.id}</span>
+                <span class="text-[11px] text-gray-400 font-mono">${order.dataFormatada || ''}</span>
+                ${badgeStatus}
+              </div>
+
+              <div class="flex items-center gap-2">
+                ${notificadoTag}
+                <button onclick="imprimirFichaProducao('${order.id}')" title="Imprimir Ordem de Confecção para a Máquina" class="text-gray-400 hover:text-white text-xs bg-[#1a241c] hover:bg-[#243327] border border-[#2d3f30] px-2 py-1 rounded transition-all cursor-pointer">
+                  🖨️ Ficha
+                </button>
+                <button onclick="excluirPedido('${order.id}')" title="Excluir Pedido" class="text-gray-500 hover:text-red-400 text-xs px-1.5 py-1 transition-all cursor-pointer">
+                  🗑️
+                </button>
+              </div>
+            </div>
+
+            <!-- Corpo: Nome a Bordar em Destaque Gigante para o Operador -->
+            <div class="bg-[#0b0f0c] p-3 rounded-lg border border-[#1e2a20] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <span class="text-[9px] text-gray-400 uppercase font-mono tracking-wider block">Nome a Bordar na Máquina:</span>
+                <div class="text-lg sm:text-xl font-black text-[#f0c20a] font-sans tracking-widest uppercase">
+                  ${order.alunoNome || 'SEM NOME'}
+                </div>
+              </div>
+
+              <div class="text-right sm:text-right">
+                <span class="text-[9px] text-gray-400 uppercase font-mono tracking-wider block">Cliente / Contato:</span>
+                <div class="text-xs font-bold text-white flex items-center sm:justify-end gap-1.5">
+                  <span>${order.clienteNome || 'Cliente'}</span>
+                  ${cleanPhone ? `<a href="https://wa.me/55${cleanPhone}" target="_blank" class="text-[#25D366] hover:underline font-mono">(${order.clienteTelefone})</a>` : ''}
+                </div>
+              </div>
+            </div>
+
+            <!-- Detalhamento dos Itens do Pedido -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-[#0e1410] p-3 rounded-lg border border-[#1b261d]">
+              <div class="space-y-1">
+                <span class="text-[9px] text-gray-400 uppercase font-mono block">Itens Solicitados:</span>
+                ${itensHtml}
+              </div>
+
+              <div class="flex flex-col justify-between sm:items-end border-t sm:border-t-0 sm:border-l border-[#202c22] pt-2 sm:pt-0 sm:pl-3">
+                <span class="text-[9px] text-gray-400 uppercase font-mono">Total a Cobrar:</span>
+                <div class="text-base font-extrabold text-[#86efac] font-mono">
+                  R$ ${order.valorTotal || 0},00 <span class="text-[10px] text-gray-400 font-normal">(${order.totalQtd || 0} un)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Barra de Ações Operacionais -->
+            <div class="flex items-center gap-2 flex-wrap pt-1">
+              ${actionsHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ==========================================
+    // FLUXO DE STATUS DA PRODUÇÃO
+    // ==========================================
+    function updateOrderStatus(orderId, newStatus) {
+      const orders = getStoredOrders();
+      const order = orders.find(o => o.id === orderId);
+      if (order) {
+        order.status = newStatus;
+        saveOrders(orders);
+        renderAdminOrders();
+
+        let nomeStatus = 'Atualizado';
+        if (newStatus === 'em_producao') nomeStatus = 'Movido para a máquina (Bordando)';
+        else if (newStatus === 'pronto') nomeStatus = 'Confeccionado! Pronto para avisar o cliente';
+        else if (newStatus === 'entregue') nomeStatus = 'Marcado como entregue';
+        else if (newStatus === 'a_fazer') nomeStatus = 'Retornado para a fila de produção';
+
+        showToast(`Ordem ${orderId}: ${nomeStatus}`, 'success');
+      }
+    }
+
+    // ==========================================
+    // ENVIO DE MENSAGEM: "SUA BIRIBA ESTÁ PRONTA!"
+    // ==========================================
+    function notificarClientePronto(orderId) {
+      const orders = getStoredOrders();
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      let telefone = (order.clienteTelefone || '').replace(/\D/g, '');
+      if (!telefone) {
+        const inputTel = prompt("Por favor, digite o WhatsApp do cliente com DDD (apenas números):", "");
+        if (!inputTel) return;
+        telefone = inputTel.replace(/\D/g, '');
+        order.clienteTelefone = telefone;
+      }
+
+      if (telefone.length < 10) {
+        alert("Número de telefone inválido. Verifique o DDD.");
+        return;
+      }
+
+      // Montar resumo dos itens confeccionados
+      let listaItens = '';
+      if (order.qtyAgasalho > 0) listaItens += `   • ${order.qtyAgasalho}x Biriba de Agasalho (Branca c/ Azul)\n`;
+      if (order.qtyFarda > 0) listaItens += `   • ${order.qtyFarda}x Biriba de Farda (Cinza c/ Amarelo)\n`;
+      if (order.qtyDivisa > 0) listaItens += `   • ${order.qtyDivisa}x Divisa de Série (Nº ${order.serie})\n`;
+      if (order.qtyTurno > 0) {
+        const descTurno = order.turno === 'TARDE' ? 'Tarde (Vermelho)' : 'Manhã (Azul)';
+        listaItens += `   • ${order.qtyTurno}x Divisa de Turno (${descTurno})\n`;
+      }
+      if (!listaItens) {
+        listaItens = `   • 1x Kit de Bordados CPM\n`;
+      }
+      listaItens = listaItens.trimEnd();
+
+      const nomeCliente = (order.clienteNome || 'Cliente').trim();
+
+      const mensagemPronto = 
+`Olá, ${nomeCliente}! 
+Aqui é da Evolução Militar.
+
+Passando para dar uma ótima notícia: o seu pedido do Colégio Militar esta  PRONTO para retirada! 
+
+ Nome Bordado: ${order.alunoNome}
+ Itens Confeccionados:
+${listaItens}
+
+ Valor Total: R$ ${order.valorTotal || 0},00
+
+ Local de Retirada: Evolução Militar Rua: Dr. Cruz Machado 159
+ Dúvidas: (42) 99953-8715
+
+Aguardamos você para a retirada! Muito obrigado pela preferência.`;
+
+      // Atualizar status de notificado
+      order.notificadoWhatsapp = true;
+      const agora = new Date();
+      order.notificadoEm = agora.toLocaleDateString('pt-BR') + ' às ' + agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+      saveOrders(orders);
+      renderAdminOrders();
+
+      const urlWhatsApp = `https://wa.me/55${telefone}?text=${encodeURIComponent(mensagemPronto)}`;
+      window.open(urlWhatsApp, '_blank');
+      showToast(`Mensagem de biriba pronta gerada para ${order.clienteNome}!`, 'success');
+    }
+
+    // ==========================================
+    // IMPRIMIR FICHA DA PRODUÇÃO (ORDEM DE SERVIÇO)
+    // ==========================================
+    function imprimirFichaProducao(orderId) {
+      const orders = getStoredOrders();
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      let itensTexto = '';
+      if (order.qtyAgasalho > 0) itensTexto += `<li><strong>${order.qtyAgasalho}x</strong> Biriba Agasalho (Tecido Branco / Linha Azul Royal)</li>`;
+      if (order.qtyFarda > 0) itensTexto += `<li><strong>${order.qtyFarda}x</strong> Biriba Farda (Tecido Cinza / Linha Amarela Ouro)</li>`;
+      if (order.qtyDivisa > 0) itensTexto += `<li><strong>${order.qtyDivisa}x</strong> Divisa de Série Nº ${order.serie} (${serieLabels[order.serie] || ''})</li>`;
+      if (order.qtyTurno > 0) itensTexto += `<li><strong>${order.qtyTurno}x</strong> Divisa de Turno ${order.turno} (${order.turno === 'TARDE' ? 'Vermelho' : 'Azul Royal'})</li>`;
+
+      const janelaPrint = window.open('', '_blank', 'width=450,height=600');
+      janelaPrint.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Ficha de Produção - ${order.id}</title>
+          <style>
+            body { font-family: monospace; padding: 15px; color: #000; font-size: 13px; max-width: 320px; margin: auto; }
+            h2, h3 { text-align: center; margin: 3px 0; }
+            hr { border: 0; border-top: 1px dashed #000; margin: 10px 0; }
+            .box-aluno { border: 2px solid #000; padding: 10px; text-align: center; font-size: 18px; font-weight: bold; margin: 10px 0; }
+            ul { padding-left: 20px; margin: 5px 0; }
+            li { margin-bottom: 4px; }
+            .rodape { text-align: center; font-size: 10px; margin-top: 20px; }
+          </style>
+        </head>
+        <body onload="window.print()">
+          <h2>EVOLUÇÃO MILITAR</h2>
+          <h3>ORDEM DE CONFECÇÃO DE BORDADO</h3>
+          <hr/>
+          <p><strong>PEDIDO:</strong> ${order.id}</p>
+          <p><strong>DATA:</strong> ${order.dataFormatada || ''}</p>
+          <p><strong>CLIENTE:</strong> ${order.clienteNome || ''} (${order.clienteTelefone || ''})</p>
+          <hr/>
+          <div class="box-aluno">
+            ${order.alunoNome || ''}
+          </div>
+          <hr/>
+          <p><strong>ITENS A BORDAR:</strong></p>
+          <ul>
+            ${itensTexto}
+          </ul>
+          <hr/>
+          <p><strong>TOTAL DE ITENS:</strong> ${order.totalQtd || 0} un</p>
+          <p><strong>VALOR TOTAL:</strong> R$ ${order.valorTotal || 0},00</p>
+          <hr/>
+          <div class="rodape">
+            Bordador Responsável: ______________________<br>
+            Conferência / Embalagem: [ &nbsp; ] OK
+          </div>
+        </body>
+        </html>
+      `);
+      janelaPrint.document.close();
+    }
+
+    function excluirPedido(orderId) {
+      if (!confirm(`Deseja realmente excluir o pedido ${orderId}?`)) return;
+      let orders = getStoredOrders();
+      orders = orders.filter(o => o.id !== orderId);
+      saveOrders(orders);
+      renderAdminOrders();
+      showToast("Pedido excluído da produção.", "info");
+    }
+
+    function exportarBackup() {
+      const orders = getStoredOrders();
+      const blob = new Blob([JSON.stringify(orders, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `backup_bordados_cpm_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("Backup baixado com sucesso!", "success");
+    }
+
+    // ==========================================
+    // MODAL NOVO PEDIDO / COLAR WHATSAPP
+    // ==========================================
+    function openNovoPedidoModal() {
+      document.getElementById('modalNovoPedido').classList.remove('hidden');
+    }
+
+    function closeNovoPedidoModal() {
+      document.getElementById('modalNovoPedido').classList.add('hidden');
+    }
+
+    function switchModalTab(tab) {
+      const tabColar = document.getElementById('tabModalColar');
+      const tabManual = document.getElementById('tabModalManual');
+      const conteudoColar = document.getElementById('conteudoModalColar');
+      const conteudoManual = document.getElementById('conteudoModalManual');
+
+      if (tab === 'manual') {
+        tabManual.className = "py-2 px-3 border-b-2 border-lime-400 text-lime-400 cursor-pointer";
+        tabColar.className = "py-2 px-3 border-b-2 border-transparent text-gray-400 hover:text-white cursor-pointer";
+        conteudoManual.classList.remove('hidden');
+        conteudoColar.classList.add('hidden');
+      } else {
+        tabColar.className = "py-2 px-3 border-b-2 border-lime-400 text-lime-400 cursor-pointer";
+        tabManual.className = "py-2 px-3 border-b-2 border-transparent text-gray-400 hover:text-white cursor-pointer";
+        conteudoColar.classList.remove('hidden');
+        conteudoManual.classList.add('hidden');
+      }
+    }
+
+    function processarTextoWhatsApp() {
+      const texto = document.getElementById('textareaWhatsApp').value;
+      if (!texto.trim()) {
+        alert("Por favor, cole a mensagem enviada pelo cliente no campo de texto.");
+        return;
+      }
+
+      const clienteNome = document.getElementById('quickClienteNome').value.trim() || 'Cliente WhatsApp';
+      const clienteTelefone = document.getElementById('quickClienteTelefone').value.trim();
+
+      let alunoNome = 'ALUNO CPM';
+      const matchNome = texto.match(/Nome a bordar na Biriba:\s*([^\n\r]+)/i);
+      if (matchNome && matchNome[1]) {
+        alunoNome = matchNome[1].trim();
+      }
+
+      let qAgasalho = 0;
+      const matchAg = texto.match(/(\d+)x\s*Biriba BRANCA/i);
+      if (matchAg) qAgasalho = parseInt(matchAg[1]);
+
+      let qFarda = 0;
+      const matchFa = texto.match(/(\d+)x\s*Biriba CINZA/i);
+      if (matchFa) qFarda = parseInt(matchFa[1]);
+
+      let qDivisa = 0;
+      let numSerie = '1';
+      const matchDiv = texto.match(/(\d+)x\s*Divisa de Série:\s*Nº\s*(\d+)/i);
+      if (matchDiv) {
+        qDivisa = parseInt(matchDiv[1]);
+        numSerie = matchDiv[2];
+      }
+
+      let qTurno = 0;
+      let turnoTipo = 'MANHA';
+      const matchTur = texto.match(/(\d+)x\s*Divisa de Turno:\s*(MANHÃ|MANHA|TARDE)/i);
+      if (matchTur) {
+        qTurno = parseInt(matchTur[1]);
+        turnoTipo = matchTur[2].toUpperCase().includes('TARDE') ? 'TARDE' : 'MANHA';
+      }
+
+      let valorTotal = (qAgasalho * 20) + (qFarda * 20) + (qDivisa * 10) + (qTurno * 10);
+      const matchVal = texto.match(/Valor total:\s*R\$\s*(\d+)/i);
+      if (matchVal && parseInt(matchVal[1]) > 0) {
+        valorTotal = parseInt(matchVal[1]);
+      }
+
+      const novoPedido = {
+        id: 'EM-' + Math.floor(1000 + Math.random() * 9000),
+        data: new Date().toISOString(),
+        dataFormatada: 'Hoje às ' + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}),
+        clienteNome: clienteNome,
+        clienteTelefone: clienteTelefone,
+        alunoNome: alunoNome,
+        qtyAgasalho: qAgasalho,
+        qtyFarda: qFarda,
+        qtyDivisa: qDivisa,
+        serie: numSerie,
+        qtyTurno: qTurno,
+        turno: turnoTipo,
+        totalQtd: qAgasalho + qFarda + qDivisa + qTurno,
+        valorTotal: valorTotal || 20,
+        status: 'a_fazer',
+        notificadoWhatsapp: false,
+        notificadoEm: null
+      };
+
+      const orders = getStoredOrders();
+      orders.unshift(novoPedido);
+      saveOrders(orders);
+      renderAdminOrders();
+
+      closeNovoPedidoModal();
+      document.getElementById('textareaWhatsApp').value = '';
+      showToast(`Pedido ${novoPedido.id} (${alunoNome}) cadastrado na fila!`, 'success');
+    }
+
+    function salvarPedidoManual() {
+      const alunoNome = document.getElementById('manAlunoNome').value.trim().toUpperCase() || 'ALUNO CPM';
+      const clienteNome = document.getElementById('manClienteNome').value.trim() || 'Cliente';
+      const clienteTelefone = document.getElementById('manClienteTelefone').value.trim();
+      const qAgasalho = parseInt(document.getElementById('manQtyAgasalho').value) || 0;
+      const qFarda = parseInt(document.getElementById('manQtyFarda').value) || 0;
+      const serie = document.getElementById('manSerie').value || '1';
+      const turno = document.getElementById('manTurno').value || 'MANHA';
+
+      const totalItens = qAgasalho + qFarda;
+      const valorTotal = (qAgasalho * 20) + (qFarda * 20);
+
+      const novoPedido = {
+        id: 'EM-' + Math.floor(1000 + Math.random() * 9000),
+        data: new Date().toISOString(),
+        dataFormatada: 'Hoje às ' + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}),
+        clienteNome: clienteNome,
+        clienteTelefone: clienteTelefone,
+        alunoNome: alunoNome,
+        qtyAgasalho: qAgasalho,
+        qtyFarda: qFarda,
+        qtyDivisa: 0,
+        serie: serie,
+        qtyTurno: 0,
+        turno: turno,
+        totalQtd: totalItens,
+        valorTotal: valorTotal,
+        status: 'a_fazer',
+        notificadoWhatsapp: false,
+        notificadoEm: null
+      };
+
+      const orders = getStoredOrders();
+      orders.unshift(novoPedido);
+      saveOrders(orders);
+      renderAdminOrders();
+
+      closeNovoPedidoModal();
+      showToast(`Pedido ${novoPedido.id} cadastrado na fila!`, 'success');
+    }
+
+    // ==========================================
+    // FINALIZAR PEDIDO DO CLIENTE & REGISTRAR NA PRODUÇÃO
+    // ==========================================
+    function encomendarEGravarPedido() {
+      const totalQtd = qtyAgasalho + qtyFarda + qtyDivisa + qtyTurno;
+      if (totalQtd === 0) {
+        alert("Por favor, adicione a quantidade de pelo menos 1 item clicando no botão (+) acima antes de enviar!");
+        return;
+      }
+
+      const inputNome = document.getElementById('inputNome');
+      const inputClienteNome = document.getElementById('inputClienteNome');
+      const inputClienteTelefone = document.getElementById('inputClienteTelefone');
+
+      const defaultNome = currentPosto === 'ALUNO' ? 'HENRIQUE' : 'MONIQUE';
+      const nomeDigitado = inputNome.value.trim().toUpperCase() || defaultNome;
+      const nomeCompletoAluno = currentPosto ? `${currentPosto} ${nomeDigitado}` : nomeDigitado;
+
+      const clienteNome = inputClienteNome.value.trim() || 'Cliente';
+      const clienteTelefone = inputClienteTelefone.value.trim();
+
+      const valorTotal = (qtyAgasalho * 20) + (qtyFarda * 20) + (qtyDivisa * 10) + (qtyTurno * 10);
+      const serieDesc = serieLabels[currentSerie] || `${currentSerie}º Ano`;
+
+      // 1. Gravar pedido no setor de produção local
+      const novoPedido = {
+        id: 'EM-' + Math.floor(1000 + Math.random() * 9000),
+        data: new Date().toISOString(),
+        dataFormatada: 'Hoje às ' + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}),
+        clienteNome: clienteNome,
+        clienteTelefone: clienteTelefone,
+        alunoNome: nomeCompletoAluno,
+        qtyAgasalho: qtyAgasalho,
+        qtyFarda: qtyFarda,
+        qtyDivisa: qtyDivisa,
+        serie: currentSerie,
+        qtyTurno: qtyTurno,
+        turno: currentTurno,
+        totalQtd: totalQtd,
+        valorTotal: valorTotal,
+        status: 'a_fazer',
+        notificadoWhatsapp: false,
+        notificadoEm: null
+      };
+
+      const orders = getStoredOrders();
+      orders.unshift(novoPedido);
+      saveOrders(orders);
+
+      showToast(`Pedido gravado na Fila de Produção (${novoPedido.id})!`, 'success');
+
+      // 2. Gerar Mensagem e Abrir WhatsApp da Loja
+      let itensPedido = '';
+      if (qtyAgasalho > 0) itensPedido += `   • ${qtyAgasalho}x Biriba BRANCA com AZUL (Agasalho) - R$ ${qtyAgasalho * 20},00\n`;
+      if (qtyFarda > 0) itensPedido += `   • ${qtyFarda}x Biriba CINZA com AMARELO (Farda) - R$ ${qtyFarda * 20},00\n`;
+      if (qtyDivisa > 0) itensPedido += `   • ${qtyDivisa}x Divisa de Série: Nº ${currentSerie} (${serieDesc}) - R$ ${qtyDivisa * 10},00\n`;
+      if (qtyTurno > 0) {
+        const descCorTurno = currentTurno === 'TARDE' ? 'Vermelho' : 'Azul Royal';
+        const nomeTurno = currentTurno === 'TARDE' ? 'TARDE' : 'MANHÃ';
+        itensPedido += `   • ${qtyTurno}x Divisa de Turno: ${nomeTurno} (Bordado em ${descCorTurno}) - R$ ${qtyTurno * 10},00\n`;
+      }
+
+      const contatoTexto = clienteTelefone ? `• Cliente: ${clienteNome} - WhatsApp: ${clienteTelefone}\n` : `• Cliente: ${clienteNome}\n`;
+
+      const mensagem = `Olá! Gostaria de encomendar bordados para Colégio Militar no padrão oficial:\n\n` +
+        `• Pedido Nº: ${novoPedido.id}\n` +
+        contatoTexto +
+        `• Nome a bordar na Biriba: ${nomeCompletoAluno}\n` +
+        `• Itens solicitados:\n${itensPedido}\n` +
+        `• Total: ${totalQtd} item(ns) - Valor total: R$ ${valorTotal},00\n\n` +
+        `Favor confirmar o recebimento do pedido para início da confecção!`;
+
+      setTimeout(() => {
+        window.open(`https://wa.me/5542999538715?text=${encodeURIComponent(mensagem)}`, '_blank');
+      }, 500);
+    }
+
+    // ==========================================
+    // SISTEMA DE RELATÓRIO: FEITOS vs A BORDAR
+    // ==========================================
+    function openRelatorioModal() {
+      document.getElementById('modalRelatorio').classList.remove('hidden');
+      renderRelatorio();
+    }
+
+    function closeRelatorioModal() {
+      document.getElementById('modalRelatorio').classList.add('hidden');
+    }
+
+    function setReportPeriod(period) {
+      reportPeriod = period;
+      document.querySelectorAll('.report-period-btn').forEach(btn => {
+        btn.className = "report-period-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-[#162018] text-gray-400 border border-[#263528] hover:text-white cursor-pointer";
+      });
+
+      const activeBtn = document.getElementById(`rep-btn-${period}`);
+      if (activeBtn) {
+        activeBtn.className = "report-period-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-[#233827] text-[#86efac] border border-[#3b593f] cursor-pointer";
+      }
+
+      const customBox = document.getElementById('repCustomDateBox');
+      if (period === 'custom') {
+        customBox.classList.remove('hidden');
+        customBox.classList.add('flex');
+      } else {
+        customBox.classList.add('hidden');
+        customBox.classList.remove('flex');
+      }
+
+      renderRelatorio();
+    }
+
+    function getFilteredOrdersForReport() {
+      const orders = getStoredOrders();
+      const now = new Date();
+      const todayStr = now.toISOString().slice(0, 10);
+
+      if (reportPeriod === 'hoje') {
+        return orders.filter(o => (o.data || '').slice(0, 10) === todayStr);
+      } else if (reportPeriod === '7dias') {
+        const limit = new Date(Date.now() - 7 * 86400000);
+        return orders.filter(o => new Date(o.data) >= limit);
+      } else if (reportPeriod === 'mes') {
+        const monthStr = now.toISOString().slice(0, 7);
+        return orders.filter(o => (o.data || '').slice(0, 7) === monthStr);
+      } else if (reportPeriod === 'custom') {
+        const dtInicio = document.getElementById('repDataInicio').value;
+        const dtFim = document.getElementById('repDataFim').value;
+        return orders.filter(o => {
+          const oDate = (o.data || '').slice(0, 10);
+          if (dtInicio && oDate < dtInicio) return false;
+          if (dtFim && oDate > dtFim) return false;
+          return true;
+        });
+      }
+      return orders;
+    }
+
+    function renderRelatorio() {
+      const orders = getFilteredOrdersForReport();
+
+      // Separação em dois grupos:
+      // 1. Para Bordar: status 'a_fazer' ou 'em_producao'
+      // 2. Feitos: status 'pronto' ou 'entregue'
+      const paraBordar = orders.filter(o => o.status === 'a_fazer' || o.status === 'em_producao');
+      const feitos = orders.filter(o => o.status === 'pronto' || o.status === 'entregue');
+
+      // Quantitativos Para Bordar
+      let pAgasalho = 0, pFarda = 0, pDivisa = 0, pTurno = 0;
+      let pSeriesCount = {}, pTurnoCount = { 'MANHA': 0, 'TARDE': 0 };
+
+      paraBordar.forEach(o => {
+        pAgasalho += (o.qtyAgasalho || 0);
+        pFarda += (o.qtyFarda || 0);
+        pDivisa += (o.qtyDivisa || 0);
+        pTurno += (o.qtyTurno || 0);
+
+        if (o.qtyDivisa > 0 && o.serie) {
+          pSeriesCount[o.serie] = (pSeriesCount[o.serie] || 0) + o.qtyDivisa;
+        }
+        if (o.qtyTurno > 0 && o.turno) {
+          pTurnoCount[o.turno] = (pTurnoCount[o.turno] || 0) + o.qtyTurno;
+        }
+      });
+      const totalPecasParaBordar = pAgasalho + pFarda + pDivisa + pTurno;
+
+      // Quantitativos Feitos
+      let fAgasalho = 0, fFarda = 0, fDivisa = 0, fTurno = 0;
+      let faturamentoFeitos = 0;
+
+      feitos.forEach(o => {
+        fAgasalho += (o.qtyAgasalho || 0);
+        fFarda += (o.qtyFarda || 0);
+        fDivisa += (o.qtyDivisa || 0);
+        fTurno += (o.qtyTurno || 0);
+        faturamentoFeitos += (o.valorTotal || 0);
+      });
+      const totalPecasFeitas = fAgasalho + fFarda + fDivisa + fTurno;
+      const totalGeralPecas = totalPecasParaBordar + totalPecasFeitas;
+
+      // Atualizar Cards Globais
+      document.getElementById('repTotalParaBordar').textContent = `${totalPecasParaBordar} un`;
+      document.getElementById('repDescParaBordar').textContent = `${paraBordar.length} pedidos na fila de bordado`;
+
+      document.getElementById('repTotalFeitas').textContent = `${totalPecasFeitas} un`;
+      document.getElementById('repDescFeitas').textContent = `${feitos.length} pedidos confeccionados`;
+
+      document.getElementById('repFaturamento').textContent = `R$ ${faturamentoFeitos},00`;
+      document.getElementById('repTotalGeralItens').textContent = `${totalGeralPecas} peças movimentadas no período`;
+
+      document.getElementById('repBadgeCountPendentes').textContent = `${totalPecasParaBordar} peças`;
+      document.getElementById('repBadgeCountFeitos').textContent = `${totalPecasFeitas} peças`;
+
+      // Grade 1: Resumo dos Modelos Para Bordar
+      let seriesPendenteStr = Object.keys(pSeriesCount).length > 0
+        ? Object.keys(pSeriesCount).map(s => `${pSeriesCount[s]}x Nº${s}`).join(', ')
+        : 'Nenhuma';
+
+      document.getElementById('repGradeParaBordar').innerHTML = `
+        <div class="bg-[#141b16] p-2.5 rounded-lg border border-[#28392b]">
+          <div class="text-[10px] text-gray-400">Biribas Agasalho (Branca):</div>
+          <div class="text-base font-extrabold text-white font-mono">${pAgasalho} un</div>
+        </div>
+        <div class="bg-[#141b16] p-2.5 rounded-lg border border-[#28392b]">
+          <div class="text-[10px] text-gray-400">Biribas Farda (Cinza):</div>
+          <div class="text-base font-extrabold text-[#f0c20a] font-mono">${pFarda} un</div>
+        </div>
+        <div class="bg-[#141b16] p-2.5 rounded-lg border border-[#28392b]">
+          <div class="text-[10px] text-gray-400">Divisas de Série:</div>
+          <div class="text-base font-extrabold text-amber-300 font-mono">${pDivisa} un</div>
+          <div class="text-[9px] text-gray-500 truncate">${seriesPendenteStr}</div>
+        </div>
+        <div class="bg-[#141b16] p-2.5 rounded-lg border border-[#28392b]">
+          <div class="text-[10px] text-gray-400">Divisas de Turno:</div>
+          <div class="text-base font-extrabold text-cyan-300 font-mono">${pTurno} un</div>
+          <div class="text-[9px] text-gray-500">M: ${pTurnoCount['MANHA'] || 0} | T: ${pTurnoCount['TARDE'] || 0}</div>
+        </div>
+      `;
+
+      // Grade 2: Resumo dos Modelos Feitos
+      document.getElementById('repGradeFeitos').innerHTML = `
+        <div class="bg-[#141b16] p-2.5 rounded-lg border border-[#28392b]">
+          <div class="text-[10px] text-gray-400">Biribas Agasalho Feitas:</div>
+          <div class="text-base font-extrabold text-white font-mono">${fAgasalho} un</div>
+        </div>
+        <div class="bg-[#141b16] p-2.5 rounded-lg border border-[#28392b]">
+          <div class="text-[10px] text-gray-400">Biribas Farda Feitas:</div>
+          <div class="text-base font-extrabold text-[#f0c20a] font-mono">${fFarda} un</div>
+        </div>
+        <div class="bg-[#141b16] p-2.5 rounded-lg border border-[#28392b]">
+          <div class="text-[10px] text-gray-400">Divisas Série Feitas:</div>
+          <div class="text-base font-extrabold text-amber-300 font-mono">${fDivisa} un</div>
+        </div>
+        <div class="bg-[#141b16] p-2.5 rounded-lg border border-[#28392b]">
+          <div class="text-[10px] text-gray-400">Divisas Turno Feitas:</div>
+          <div class="text-base font-extrabold text-cyan-300 font-mono">${fTurno} un</div>
+        </div>
+      `;
+
+      // Lista 1: Alunos Para Bordar
+      const containerAlunosP = document.getElementById('repListaAlunosParaBordar');
+      if (paraBordar.length === 0) {
+        containerAlunosP.innerHTML = `<div class="text-xs text-gray-500 italic p-3 text-center bg-[#070a08] rounded-lg border border-[#1b251d]">Nenhum pedido pendente para bordar neste período! 🎉</div>`;
+      } else {
+        containerAlunosP.innerHTML = paraBordar.map(o => `
+          <div class="bg-[#121914] p-2 rounded-lg border border-[#263728] flex items-center justify-between text-xs">
+            <div>
+              <div class="font-bold text-[#f0c20a] font-mono uppercase">${o.alunoNome || 'Sem Nome'}</div>
+              <div class="text-[10px] text-gray-400">${o.id} • ${o.dataFormatada || ''}</div>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] font-bold text-amber-300 bg-amber-950/80 px-1.5 py-0.5 rounded border border-amber-800">${o.status === 'em_producao' ? '🔵 Bordando' : '🟡 Fila'}</span>
+              <div class="text-[10px] text-gray-300 mt-0.5 font-mono">${o.totalQtd || 0} peça(s)</div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Lista 2: Alunos Feitos
+      const containerAlunosF = document.getElementById('repListaAlunosFeitos');
+      if (feitos.length === 0) {
+        containerAlunosF.innerHTML = `<div class="text-xs text-gray-500 italic p-3 text-center bg-[#070a08] rounded-lg border border-[#1b251d]">Nenhum pedido concluído neste período.</div>`;
+      } else {
+        containerAlunosF.innerHTML = feitos.map(o => `
+          <div class="bg-[#121914] p-2 rounded-lg border border-[#263728] flex items-center justify-between text-xs">
+            <div>
+              <div class="font-bold text-lime-400 font-mono uppercase">${o.alunoNome || 'Sem Nome'}</div>
+              <div class="text-[10px] text-gray-400">${o.clienteNome || 'Cliente'} • ${o.id}</div>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] font-bold text-lime-300 bg-lime-950/80 px-1.5 py-0.5 rounded border border-lime-800">${o.status === 'entregue' ? '✔️ Entregue' : '🟢 Pronto'}</span>
+              <div class="text-[10px] text-white font-mono mt-0.5">R$ ${o.valorTotal || 0},00</div>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // Impressão Oficial do Relatório
+    function imprimirRelatorioGeral() {
+      const orders = getFilteredOrdersForReport();
+      const paraBordar = orders.filter(o => o.status === 'a_fazer' || o.status === 'em_producao');
+      const feitos = orders.filter(o => o.status === 'pronto' || o.status === 'entregue');
+
+      let pAgasalho = 0, pFarda = 0, pDivisa = 0, pTurno = 0;
+      paraBordar.forEach(o => {
+        pAgasalho += (o.qtyAgasalho || 0);
+        pFarda += (o.qtyFarda || 0);
+        pDivisa += (o.qtyDivisa || 0);
+        pTurno += (o.qtyTurno || 0);
+      });
+
+      let fAgasalho = 0, fFarda = 0, fDivisa = 0, fTurno = 0, faturamento = 0;
+      feitos.forEach(o => {
+        fAgasalho += (o.qtyAgasalho || 0);
+        fFarda += (o.qtyFarda || 0);
+        fDivisa += (o.qtyDivisa || 0);
+        fTurno += (o.qtyTurno || 0);
+        faturamento += (o.valorTotal || 0);
+      });
+
+      const dataHojeFormatada = new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+
+      const printWin = window.open('', '_blank', 'width=750,height=900');
+      printWin.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Relatório de Produção CPM - Evolução Militar</title>
+          <style>
+            body { font-family: Arial, sans-serif; font-size: 12px; color: #111; padding: 25px; line-height: 1.4; }
+            h1 { font-size: 18px; margin: 0; text-transform: uppercase; }
+            h2 { font-size: 14px; margin: 5px 0 15px 0; color: #444; }
+            hr { border: 0; border-top: 1px solid #ccc; margin: 15px 0; }
+            .kpi-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            .kpi-table td { padding: 10px; border: 1px solid #ddd; text-align: center; font-size: 13px; }
+            .kpi-num { font-size: 20px; font-weight: bold; }
+            .sec-title { font-size: 14px; font-weight: bold; background: #eee; padding: 6px 10px; border-left: 4px solid #132c8c; margin-top: 20px; }
+            .data-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+            .data-table th, .data-table td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; font-size: 11px; }
+            .data-table th { background: #f8f9fa; }
+            .footer-note { font-size: 10px; color: #777; margin-top: 30px; text-align: center; }
+          </style>
+        </head>
+        <body onload="window.print()">
+          <h1>EVOLUÇÃO MILITAR • ARTIGOS MILITARES</h1>
+          <h2>RELATÓRIO CONSOLIDADO DA PRODUÇÃO DE BORDADOS CPM</h2>
+          <p><strong>Emissão:</strong> ${dataHojeFormatada} &nbsp;|&nbsp; <strong>Filtro:</strong> ${reportPeriod.toUpperCase()}</p>
+          <hr/>
+
+          <table class="kpi-table">
+            <tr>
+              <td>
+                <div>Total Peças Para Bordar</div>
+                <div class="kpi-num" style="color: #d97706;">${pAgasalho + pFarda + pDivisa + pTurno} un</div>
+                <small>${paraBordar.length} pedidos pendentes</small>
+              </td>
+              <td>
+                <div>Total Peças Confeccionadas</div>
+                <div class="kpi-num" style="color: #16a34a;">${fAgasalho + fFarda + fDivisa + fTurno} un</div>
+                <small>${feitos.length} pedidos feitos</small>
+              </td>
+              <td>
+                <div>Faturamento Concluído</div>
+                <div class="kpi-num" style="color: #0f172a;">R$ ${faturamento},00</div>
+                <small>Bordados finalizados</small>
+              </td>
+            </tr>
+          </table>
+
+          <div class="sec-title">1. RESUMO DOS PRODUTOS PARA BORDAR (FILA DE PRODUÇÃO)</div>
+          <p>
+            • <strong>Biribas Agasalho (Branca/Azul):</strong> ${pAgasalho} un &nbsp;|&nbsp; 
+            • <strong>Biribas Farda (Cinza/Amarelo):</strong> ${pFarda} un &nbsp;|&nbsp; 
+            • <strong>Divisas de Série:</strong> ${pDivisa} un &nbsp;|&nbsp; 
+            • <strong>Divisas de Turno:</strong> ${pTurno} un
+          </p>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Nº Pedido</th>
+                <th>Nome a Bordar (Aluno)</th>
+                <th>Itens Solicitados</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${paraBordar.length > 0 ? paraBordar.map(o => `
+                <tr>
+                  <td><strong>${o.id}</strong></td>
+                  <td><strong>${o.alunoNome || '-'}</strong></td>
+                  <td>${(o.qtyAgasalho ? o.qtyAgasalho + 'x Agas. ' : '') + (o.qtyFarda ? o.qtyFarda + 'x Farda ' : '') + (o.qtyDivisa ? o.qtyDivisa + 'x Série ' + o.serie + ' ' : '') + (o.qtyTurno ? o.qtyTurno + 'x Turno ' + o.turno : '')}</td>
+                  <td>${o.status === 'em_producao' ? 'BORDANDO' : 'NA FILA'}</td>
+                </tr>
+              `).join('') : '<tr><td colspan="4" style="text-align:center;">Nenhum pedido pendente</td></tr>'}
+            </tbody>
+          </table>
+
+          <div class="sec-title" style="border-left-color: #16a34a;">2. RESUMO DOS PRODUTOS FEITOS / CONCLUÍDOS</div>
+          <p>
+            • <strong>Biribas Agasalho Feitas:</strong> ${fAgasalho} un &nbsp;|&nbsp; 
+            • <strong>Biribas Farda Feitas:</strong> ${fFarda} un &nbsp;|&nbsp; 
+            • <strong>Divisas de Série Feitas:</strong> ${fDivisa} un &nbsp;|&nbsp; 
+            • <strong>Divisas de Turno Feitas:</strong> ${fTurno} un
+          </p>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Nº Pedido</th>
+                <th>Aluno Confeccionado</th>
+                <th>Cliente / Responsável</th>
+                <th>Total Peças</th>
+                <th>Valor</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${feitos.length > 0 ? feitos.map(o => `
+                <tr>
+                  <td><strong>${o.id}</strong></td>
+                  <td><strong>${o.alunoNome || '-'}</strong></td>
+                  <td>${o.clienteNome || '-'} (${o.clienteTelefone || '-'})</td>
+                  <td>${o.totalQtd || 0} un</td>
+                  <td>R$ ${o.valorTotal || 0},00</td>
+                  <td>${o.status === 'entregue' ? 'ENTREGUE' : 'PRONTO'}</td>
+                </tr>
+              `).join('') : '<tr><td colspan="6" style="text-align:center;">Nenhum pedido concluído no período</td></tr>'}
+            </tbody>
+          </table>
+
+          <div class="footer-note">
+            Evolução Militar Artigos Militares & Bordados • www.evolucaomilitar.com.br • (42) 99953-8715
+          </div>
+        </body>
+        </html>
+      `);
+      printWin.document.close();
+    }
+
+    // Copiar Resumo para WhatsApp da Equipe
+    function copiarResumoRelatorioWhatsApp() {
+      const orders = getFilteredOrdersForReport();
+      const paraBordar = orders.filter(o => o.status === 'a_fazer' || o.status === 'em_producao');
+      const feitos = orders.filter(o => o.status === 'pronto' || o.status === 'entregue');
+
+      let pAg = 0, pFa = 0, pDi = 0, pTu = 0;
+      paraBordar.forEach(o => { pAg += (o.qtyAgasalho || 0); pFa += (o.qtyFarda || 0); pDi += (o.qtyDivisa || 0); pTu += (o.qtyTurno || 0); });
+
+      let fAg = 0, fFa = 0, fDi = 0, fTu = 0, faturamento = 0;
+      feitos.forEach(o => { fAg += (o.qtyAgasalho || 0); fFa += (o.qtyFarda || 0); fDi += (o.qtyDivisa || 0); fTu += (o.qtyTurno || 0); faturamento += (o.valorTotal || 0); });
+
+      const texto = 
+`📊 *RELATÓRIO DE PRODUÇÃO CPM - EVOLUÇÃO MILITAR*
+📅 Período: ${reportPeriod.toUpperCase()}
+
+⏳ *PRODUTOS PARA BORDAR (PENDENTES):*
+• Total: ${pAg + pFa + pDi + pTu} peças (${paraBordar.length} pedidos)
+• Biribas Agasalho (Branca): ${pAg} un
+• Biribas Farda (Cinza): ${pFa} un
+• Divisas Série: ${pDi} un
+• Divisas Turno: ${pTu} un
+
+✅ *PRODUTOS FEITOS (CONFECCIONADOS):*
+• Total: ${fAg + fFa + fDi + fTu} peças (${feitos.length} pedidos)
+• Biribas Agasalho Feitas: ${fAg} un
+• Biribas Farda Feitas: ${fFa} un
+• Divisas Série: ${fDi} un
+• Divisas Turno: ${fTu} un
+💰 Faturamento Feito: R$ ${faturamento},00`;
+
+      navigator.clipboard.writeText(texto).then(() => {
+        showToast("Resumo copiado para a área de transferência!", "success");
+      }).catch(() => {
+        prompt("Copie o resumo abaixo:", texto);
+      });
+    }
+
+    // ==========================================
+    // FUNÇÕES DO SIMULADOR (VISUAL & CORES)
+    // ==========================================
     function setModelo(modelo) {
       currentModelo = modelo;
       const root = document.documentElement;
@@ -583,21 +2508,21 @@
 
       if (modelo === 'FARDA') {
         root.style.setProperty('--cor-linha', '#f0c20a');
-        container.className = "w-[360px] h-[76px] max-w-full fabric-farda biriba-frame rounded-sm flex flex-col items-center justify-center relative select-none shadow-2xl transition-all";
+        container.className = "w-[360px] h-[80px] max-w-full fabric-farda biriba-frame rounded-sm flex flex-col items-center justify-center relative select-none shadow-2xl transition-all";
         innerStitch.style.borderColor = 'rgba(240, 194, 10, 0.3)';
 
-        btnFarda.className = "py-2 px-2 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-0.5 text-center bg-[#233827] border-[#4d7c0f] text-[#86efac] shadow-md";
-        btnAgasalho.className = "py-2 px-2 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-0.5 text-center bg-[#1c261e] border-[#334636] text-gray-300 hover:bg-[#233026]";
+        btnFarda.className = "py-2 px-2 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-0.5 text-center bg-[#233827] border-[#4d7c0f] text-[#86efac] shadow-md cursor-pointer";
+        btnAgasalho.className = "py-2 px-2 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-0.5 text-center bg-[#1c261e] border-[#334636] text-gray-300 hover:bg-[#233026] cursor-pointer";
 
         badgeModelo.textContent = "PRÉVIA: FARDA";
         badgeModelo.className = "text-yellow-400 font-semibold uppercase";
       } else {
         root.style.setProperty('--cor-linha', '#132c8c');
-        container.className = "w-[360px] h-[76px] max-w-full fabric-agasalho biriba-frame rounded-sm flex flex-col items-center justify-center relative select-none shadow-2xl transition-all";
+        container.className = "w-[360px] h-[80px] max-w-full fabric-agasalho biriba-frame rounded-sm flex flex-col items-center justify-center relative select-none shadow-2xl transition-all";
         innerStitch.style.borderColor = 'rgba(19, 44, 140, 0.25)';
 
-        btnAgasalho.className = "py-2 px-2 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-0.5 text-center bg-[#233827] border-[#4d7c0f] text-[#86efac] shadow-md";
-        btnFarda.className = "py-2 px-2 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-0.5 text-center bg-[#1c261e] border-[#334636] text-gray-300 hover:bg-[#233026]";
+        btnAgasalho.className = "py-2 px-2 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-0.5 text-center bg-[#233827] border-[#4d7c0f] text-[#86efac] shadow-md cursor-pointer";
+        btnFarda.className = "py-2 px-2 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-0.5 text-center bg-[#1c261e] border-[#334636] text-gray-300 hover:bg-[#233026] cursor-pointer";
 
         badgeModelo.textContent = "PRÉVIA: AGASALHO";
         badgeModelo.className = "text-lime-400 font-semibold uppercase";
@@ -607,29 +2532,27 @@
     }
 
     function setPosto(posto) {
-      currentPosto = posto;
+      currentPosto = (posto === 'ALUNO') ? 'ALUNO' : 'ALUNA';
       const inputNome = document.getElementById('inputNome');
 
-      if (posto === 'ALUNO') {
+      if (currentPosto === 'ALUNO') {
         if (inputNome.value === 'MONIQUE' || !inputNome.value.trim()) {
           inputNome.value = 'HENRIQUE';
         }
-      } else if (posto === 'ALUNA') {
+      } else {
         if (inputNome.value === 'HENRIQUE' || !inputNome.value.trim()) {
           inputNome.value = 'MONIQUE';
         }
       }
 
       document.querySelectorAll('.posto-btn').forEach(btn => {
-        btn.className = "posto-btn py-1.5 px-2 rounded-lg text-xs font-bold bg-[#1c261e] border border-[#334636] text-gray-300 transition-all hover:bg-[#233026]";
+        btn.className = "posto-btn py-2 px-3 rounded-xl text-xs font-bold bg-[#1c261e] border border-[#334636] text-gray-300 transition-all hover:bg-[#233026] cursor-pointer flex items-center justify-center gap-1.5";
       });
 
-      if (posto === 'ALUNA') {
-        document.getElementById('btn-aluna').className = "posto-btn py-1.5 px-2 rounded-lg text-xs font-bold bg-[#233827] border border-[#4d7c0f] text-[#86efac] transition-all";
-      } else if (posto === 'ALUNO') {
-        document.getElementById('btn-aluno').className = "posto-btn py-1.5 px-2 rounded-lg text-xs font-bold bg-[#233827] border border-[#4d7c0f] text-[#86efac] transition-all";
+      if (currentPosto === 'ALUNA') {
+        document.getElementById('btn-aluna').className = "posto-btn py-2 px-3 rounded-xl text-xs font-bold bg-[#233827] border border-[#4d7c0f] text-[#86efac] transition-all cursor-pointer flex items-center justify-center gap-1.5";
       } else {
-        document.getElementById('btn-outro').className = "posto-btn py-1.5 px-2 rounded-lg text-xs font-bold bg-[#233827] border border-[#4d7c0f] text-[#86efac] transition-all";
+        document.getElementById('btn-aluno').className = "posto-btn py-2 px-3 rounded-xl text-xs font-bold bg-[#233827] border border-[#4d7c0f] text-[#86efac] transition-all cursor-pointer flex items-center justify-center gap-1.5";
       }
 
       renderAll();
@@ -639,17 +2562,12 @@
       currentSerie = serie;
 
       document.querySelectorAll('.serie-btn').forEach(btn => {
-        btn.className = "serie-btn py-2 px-1 rounded-xl text-xs font-bold bg-[#1c261e] border border-[#334636] text-gray-300 transition-all hover:bg-[#233026] text-center";
+        btn.className = "serie-btn py-2 px-1 rounded-xl text-xs font-bold bg-[#1c261e] border border-[#334636] text-gray-300 transition-all hover:bg-[#233026] text-center cursor-pointer";
       });
 
       const activeBtn = document.getElementById(`btn-serie-${serie}`);
       if (activeBtn) {
-        activeBtn.className = "serie-btn py-2 px-1 rounded-xl text-xs font-bold bg-[#233827] border border-[#4d7c0f] text-[#86efac] shadow-md transition-all text-center";
-      }
-
-      if (qtyDivisa === 0) {
-        qtyDivisa = 1;
-        document.getElementById('qtyDivisa').textContent = qtyDivisa;
+        activeBtn.className = "serie-btn py-2 px-1 rounded-xl text-xs font-bold bg-[#233827] border border-[#4d7c0f] text-[#86efac] shadow-md transition-all text-center cursor-pointer";
       }
 
       renderAll();
@@ -669,8 +2587,8 @@
       const tagTurnoQtd = document.getElementById('tagTurnoQtd');
 
       if (turno === 'TARDE') {
-        btnTarde.className = "py-2.5 px-3 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-1 text-center bg-[#3b1212] border-[#b91c1c] text-[#fca5a5] shadow-md";
-        btnManha.className = "py-2.5 px-3 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-1 text-center bg-[#1c261e] border-[#334636] text-gray-300 hover:bg-[#233026]";
+        btnTarde.className = "py-2.5 px-3 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-1 text-center bg-[#3b1212] border-[#b91c1c] text-[#fca5a5] shadow-md cursor-pointer";
+        btnManha.className = "py-2.5 px-3 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-1 text-center bg-[#1c261e] border-[#334636] text-gray-300 hover:bg-[#233026] cursor-pointer";
 
         patchBg.setAttribute('stroke', '#dc2626');
         innerStitch.setAttribute('stroke', 'rgba(220, 38, 38, 0.4)');
@@ -685,8 +2603,8 @@
         tagTurnoQtd.textContent = 'TARDE';
         tagTurnoQtd.className = 'text-[9px] text-red-400 bg-red-950/70 px-1 py-0.5 rounded border border-red-800/60 font-mono';
       } else {
-        btnManha.className = "py-2.5 px-3 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-1 text-center bg-[#233827] border-[#4d7c0f] text-[#86efac] shadow-md";
-        btnTarde.className = "py-2.5 px-3 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-1 text-center bg-[#1c261e] border-[#334636] text-gray-300 hover:bg-[#233026]";
+        btnManha.className = "py-2.5 px-3 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-1 text-center bg-[#233827] border-[#4d7c0f] text-[#86efac] shadow-md cursor-pointer";
+        btnTarde.className = "py-2.5 px-3 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-1 text-center bg-[#1c261e] border-[#334636] text-gray-300 hover:bg-[#233026] cursor-pointer";
 
         patchBg.setAttribute('stroke', '#132c8c');
         innerStitch.setAttribute('stroke', 'rgba(19, 44, 140, 0.35)');
@@ -700,11 +2618,6 @@
         dotTurnoQtd.className = 'w-3 h-3 rounded-full bg-[#132c8c] border border-cyan-400';
         tagTurnoQtd.textContent = 'MANHÃ';
         tagTurnoQtd.className = 'text-[9px] text-cyan-400 bg-cyan-950/70 px-1 py-0.5 rounded border border-cyan-800/60 font-mono';
-      }
-
-      if (qtyTurno === 0) {
-        qtyTurno = 1;
-        document.getElementById('qtyTurno').textContent = qtyTurno;
       }
 
       renderAll();
@@ -725,19 +2638,6 @@
         document.getElementById('qtyTurno').textContent = qtyTurno;
       }
 
-      // Garantir ao menos 1 item no pedido geral
-      if (qtyAgasalho === 0 && qtyFarda === 0 && qtyDivisa === 0 && qtyTurno === 0) {
-        if (tipo === 'turno') qtyTurno = 1;
-        else if (tipo === 'divisa') qtyDivisa = 1;
-        else if (tipo === 'agasalho') qtyAgasalho = 1;
-        else qtyFarda = 1;
-
-        document.getElementById('qtyAgasalho').textContent = qtyAgasalho;
-        document.getElementById('qtyFarda').textContent = qtyFarda;
-        document.getElementById('qtyDivisa').textContent = qtyDivisa;
-        document.getElementById('qtyTurno').textContent = qtyTurno;
-      }
-
       renderAll();
     }
 
@@ -748,12 +2648,12 @@
       const divisaNumberDisplay = document.getElementById('divisaNumberDisplay');
       const labelSerieBadge = document.getElementById('labelSerieBadge');
       const tagDivisaQtd = document.getElementById('tagDivisaQtd');
-      const btnWhatsApp = document.getElementById('btnWhatsApp');
       const totalItems = document.getElementById('totalItems');
       const totalPreco = document.getElementById('totalPreco');
+      const btnWhatsApp = document.getElementById('btnWhatsApp');
       const btnText = document.getElementById('btnText');
 
-      // 1. Biriba
+      // 1. Biriba (Posto em Cima e Nome do Aluno em Baixo - Padrão Oficial CPM)
       const defaultNome = currentPosto === 'ALUNO' ? 'HENRIQUE' : 'MONIQUE';
       const nome = inputNome.value.trim().toUpperCase() || defaultNome;
 
@@ -766,29 +2666,42 @@
 
       displayNome.textContent = nome;
 
-      let uniformSize = '26px';
+      let uniformSize = '24px';
       let uniformSpacing = '0.5px';
 
-      if (nome.length > 12) {
-        uniformSize = '19px';
-        uniformSpacing = '-0.5px';
-      } else if (nome.length > 9) {
-        uniformSize = '22px';
-        uniformSpacing = '0px';
-      } else if (nome.length > 7) {
-        uniformSize = '24px';
-        uniformSpacing = '0.5px';
-      } else {
-        uniformSize = '26px';
-        uniformSpacing = '0.5px';
-      }
-
-      displayNome.style.fontSize = uniformSize;
-      displayNome.style.letterSpacing = uniformSpacing;
-      
       if (currentPosto) {
+        // Modo com 2 Linhas: Posto em Cima + Nome do Aluno em Baixo
+        if (nome.length > 12) {
+          uniformSize = '17px';
+          uniformSpacing = '-0.5px';
+        } else if (nome.length > 9) {
+          uniformSize = '20px';
+          uniformSpacing = '0px';
+        } else if (nome.length > 7) {
+          uniformSize = '22px';
+          uniformSpacing = '0.3px';
+        } else {
+          uniformSize = '24px';
+          uniformSpacing = '0.5px';
+        }
+        displayNome.style.fontSize = uniformSize;
+        displayNome.style.letterSpacing = uniformSpacing;
         displayPosto.style.fontSize = uniformSize;
         displayPosto.style.letterSpacing = uniformSpacing;
+      } else {
+        // Modo Sem Título: Apenas 1 Linha centralizada
+        if (nome.length > 12) {
+          uniformSize = '22px';
+          uniformSpacing = '-0.5px';
+        } else if (nome.length > 9) {
+          uniformSize = '25px';
+          uniformSpacing = '0px';
+        } else {
+          uniformSize = '28px';
+          uniformSpacing = '0.5px';
+        }
+        displayNome.style.fontSize = uniformSize;
+        displayNome.style.letterSpacing = uniformSpacing;
       }
 
       // 2. Divisa de Série
@@ -801,37 +2714,120 @@
       const totalQtd = qtyAgasalho + qtyFarda + qtyDivisa + qtyTurno;
       const valorTotal = (qtyAgasalho * 20) + (qtyFarda * 20) + (qtyDivisa * 10) + (qtyTurno * 10);
 
-      totalItems.textContent = `${totalQtd} item${totalQtd > 1 ? 's' : ''}`;
+      totalItems.textContent = `${totalQtd} item${totalQtd === 1 ? '' : 's'}`;
       totalPreco.textContent = `R$ ${valorTotal},00`;
-      btnText.textContent = `ENCOMENDAR ${totalQtd} ITEM${totalQtd > 1 ? 'S' : ''} (R$ ${valorTotal},00)`;
 
-      const textoCompleto = currentPosto ? `${currentPosto} ${nome}` : nome;
-
-      let itensPedido = '';
-      if (qtyAgasalho > 0) {
-        itensPedido += `   • ${qtyAgasalho}x Biriba BRANCA com AZUL (Agasalho) - R$ ${qtyAgasalho * 20},00\n`;
+      if (totalQtd === 0) {
+        btnText.textContent = `ESCOLHA A QUANTIDADE DOS ITENS ACIMA (+)`;
+        btnWhatsApp.className = "w-full py-4 px-4 bg-[#1c261e] text-gray-400 border border-[#2a382c] font-extrabold text-sm sm:text-base rounded-xl shadow-xl transition-all flex items-center justify-center gap-2 text-center cursor-pointer opacity-75";
+      } else {
+        btnText.textContent = `ENCOMENDAR ${totalQtd} ITEM${totalQtd > 1 ? 'S' : ''} (R$ ${valorTotal},00)`;
+        btnWhatsApp.className = "w-full py-4 px-4 bg-[#25D366] hover:bg-[#20ba59] active:scale-[0.98] text-[#052e16] font-extrabold text-sm sm:text-base rounded-xl shadow-xl hover:shadow-green-900/40 transition-all flex items-center justify-center gap-2 text-center cursor-pointer";
       }
-      if (qtyFarda > 0) {
-        itensPedido += `   • ${qtyFarda}x Biriba CINZA com AMARELO (Farda) - R$ ${qtyFarda * 20},00\n`;
-      }
-      if (qtyDivisa > 0) {
-        itensPedido += `   • ${qtyDivisa}x Divisa de Série: Nº ${currentSerie} (${serieDesc}) - R$ ${qtyDivisa * 10},00\n`;
-      }
-      if (qtyTurno > 0) {
-        const descCorTurno = currentTurno === 'TARDE' ? 'Vermelho' : 'Azul Royal';
-        const nomeTurno = currentTurno === 'TARDE' ? 'TARDE' : 'MANHÃ';
-        itensPedido += `   • ${qtyTurno}x Divisa de Turno: ${nomeTurno} (Bordado em ${descCorTurno}) - R$ ${qtyTurno * 10},00\n`;
-      }
-
-      const mensagem = `Olá! Gostaria de encomendar bordados para Colégio Militar no padrão oficial:\n\n` +
-        (qtyAgasalho > 0 || qtyFarda > 0 ? `• Nome a bordar na Biriba: ${textoCompleto}\n` : '') +
-        `• Itens solicitados:\n${itensPedido}\n` +
-        `• Total: ${totalQtd} item(ns) - Valor total: R$ ${valorTotal},00`;
-
-      btnWhatsApp.href = `https://wa.me/5542999538715?text=${encodeURIComponent(mensagem)}`;
     }
 
+    // ==========================================
+    // SISTEMA DE INSTALAÇÃO & PWA / DOWNLOAD DO APP
+    // ==========================================
+    let deferredInstallPrompt = null;
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('[PWA] Service Worker registrado com sucesso:', reg.scope))
+          .catch(err => console.log('[PWA] Erro ao registrar Service Worker:', err));
+      });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      const btnFooter = document.getElementById('btnInstallFooter');
+      if (btnFooter) {
+        btnFooter.classList.add('animate-pulse');
+      }
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      showToast("🎉 Aplicativo instalado com sucesso no seu dispositivo!", "success");
+      const btnLabel = document.getElementById('btnInstallFooterLabel');
+      if (btnLabel) btnLabel.textContent = "✅ App Instalado";
+      const btnNativeLabel = document.getElementById('btnTriggerLabel');
+      if (btnNativeLabel) btnNativeLabel.textContent = "✅ APLICATIVO JÁ INSTALADO!";
+    });
+
+    function abrirModalInstalacao() {
+      const modal = document.getElementById('modalInstalarApp');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function fecharModalInstalacao() {
+      const modal = document.getElementById('modalInstalarApp');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function switchAppTab(tab) {
+      const tabInstalar = document.getElementById('tabInstalador');
+      const tabOffline = document.getElementById('tabOffline');
+      const tabApk = document.getElementById('tabApk');
+
+      const cInstalar = document.getElementById('conteudoAppInstalar');
+      const cOffline = document.getElementById('conteudoAppOffline');
+      const cApk = document.getElementById('conteudoAppApk');
+
+      [tabInstalar, tabOffline, tabApk].forEach(t => {
+        t.className = "py-2 px-3 border-b-2 border-transparent text-gray-400 hover:text-white cursor-pointer";
+      });
+      [cInstalar, cOffline, cApk].forEach(c => c.classList.add('hidden'));
+
+      if (tab === 'offline') {
+        tabOffline.className = "py-2 px-3 border-b-2 border-lime-400 text-lime-400 cursor-pointer";
+        cOffline.classList.remove('hidden');
+      } else if (tab === 'apk') {
+        tabApk.className = "py-2 px-3 border-b-2 border-lime-400 text-lime-400 cursor-pointer";
+        cApk.classList.remove('hidden');
+      } else {
+        tabInstalar.className = "py-2 px-3 border-b-2 border-lime-400 text-lime-400 cursor-pointer";
+        cInstalar.classList.remove('hidden');
+      }
+    }
+
+    function executarInstalacaoNativa() {
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            showToast("Instalando o aplicativo no seu aparelho...", "success");
+            fecharModalInstalacao();
+          }
+          deferredInstallPrompt = null;
+        });
+      } else {
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+        if (isStandalone) {
+          alert("O aplicativo já está instalado e rodando em modo nativo no seu aparelho! 🎉");
+        } else {
+          alert("Dica de Instalação:\n\n• No Google Chrome ou Edge (Android/PC): Clique nos 3 pontinhos no canto superior do navegador e selecione 'Instalar aplicativo' ou 'Adicionar à tela inicial'.\n\n• No iPhone/iPad (Safari): Toque no botão Compartilhar (⎋) e depois em 'Adicionar à Tela de Início (➕)'.");
+        }
+      }
+    }
+
+    function baixarAppOffline() {
+      const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Simulador_Bordados_CPM_Evolucao_Militar.html';
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("Download concluído! Arquivo do app salvo no seu aparelho.", "success");
+    }
+
+    // Inicialização
     renderAll();
+    getStoredOrders();
   </script>
 </body>
 </html>

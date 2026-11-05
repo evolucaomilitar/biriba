@@ -1,16 +1,27 @@
 {
-  "name": "Simulador de Biriba - Evolução Militar",
-  "short_name": "Biriba Militar",
-  "description": "Personalize sua biriba oficial do Colégio Militar e peça direto pelo WhatsApp",
+  "name": "Simulador de Biribas & Produção CPM - Evolução Militar",
+  "short_name": "Bordados CPM",
+  "description": "Simulador oficial de biribas, divisas de série e turno do Colégio Militar com painel de produção e relatórios.",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#0b0f0c",
   "theme_color": "#0b0f0c",
+  "lang": "pt-BR",
+  "categories": ["shopping", "business", "utilities"],
   "icons": [
     {
-      "src": "icon.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }
