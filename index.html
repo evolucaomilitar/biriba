@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Simulador & Produção de Bordados CPM - Evolução Militar</title>
-  <meta name="description" content="Simulador de Biribas, Divisas de Série e Turno do Colégio Militar com Painel de Controle de Produção e Relatórios.">
+  <meta name="description" content="Simulador de Biribas, Divisas de Série e Turno do Colégio Militar com Painel de Controle de Produção, Sincronização em 1 Clique e Relatórios.">
   <meta name="theme-color" content="#0b0f0c">
   
   <link rel="manifest" href="manifest.json">
@@ -735,6 +735,17 @@
             <span>Relatório Feitos x A Bordar</span>
           </button>
 
+          <!-- Botão Rápido: Importar Pedido do WhatsApp -->
+          <button 
+            type="button" 
+            onclick="colarDoWhatsAppAuto()" 
+            class="px-3 py-2 bg-[#25D366] hover:bg-[#20ba59] active:scale-95 text-[#052e16] font-black rounded-lg text-xs transition-all flex items-center gap-1.5 shadow-md cursor-pointer"
+            title="Importar pedido colado do WhatsApp"
+          >
+            <span>📋</span>
+            <span>Importar WhatsApp</span>
+          </button>
+
           <button 
             type="button" 
             onclick="openNovoPedidoModal()" 
@@ -796,6 +807,60 @@
         <div class="col-span-2 sm:col-span-1 bg-[#162018] border border-[#324534] rounded-xl p-3 flex flex-col items-center justify-center text-center">
           <span class="text-[10px] text-[#86efac] font-bold uppercase tracking-wider">Total Faturado</span>
           <span id="metricTotalFaturado" class="text-xl font-black text-white font-mono mt-1">R$ 0</span>
+        </div>
+      </div>
+
+      <!-- HUB DE SINCRONIZAÇÃO EM NUVEM AUTOMÁTICA EM TEMPO REAL -->
+      <div class="bg-[#101813] border border-[#2d4232] rounded-xl p-3.5 sm:p-4 text-xs space-y-3 shadow-md">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-[#1c2c20] pb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <strong class="text-lime-300 font-sans text-xs sm:text-sm tracking-wide uppercase">
+              SINCRONIZAÇÃO AUTOMÁTICA EM TEMPO REAL (NUVEM ATIVA)
+            </strong>
+          </div>
+          <div id="badgeStatusNuvem" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-600/70 text-emerald-300 text-[11px] font-bold self-start sm:self-auto">
+            <span id="pontoStatusNuvem" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="textoStatusNuvem">Conectado em Tempo Real</span>
+          </div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <p class="text-gray-300 text-[11px] leading-relaxed max-w-2xl">
+            ⚡ <strong>100% Automático:</strong> Quando o cliente finaliza o pedido no celular dele, o pedido entra <strong>instantaneamente</strong> aqui na sua fila com alerta sonoro 🔔, sem precisar clicar em nada! Todas as funções (iniciar bordado, marcar pronto, entregar e excluir) sincronizam automaticamente entre todos os seus dispositivos.
+          </p>
+
+          <div class="flex items-center gap-1.5 flex-wrap flex-shrink-0">
+            <button 
+              type="button" 
+              onclick="puxarPedidosNuvemHistorico(false)" 
+              class="px-2.5 py-1.5 bg-[#17241a] hover:bg-[#203325] border border-[#2d4933] text-lime-300 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shadow-sm"
+              title="Buscar pedidos recentes na nuvem agora"
+            >
+              <span>🔄</span>
+              <span>Sincronizar Agora</span>
+            </button>
+
+            <button 
+              type="button" 
+              onclick="tocarSinoNotificacao()" 
+              class="px-2.5 py-1.5 bg-[#141d16] hover:bg-[#1d2a20] border border-[#26382a] text-gray-300 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shadow-sm"
+              title="Testar sinal sonoro de novos pedidos"
+            >
+              <span>🔔</span>
+              <span>Testar Som</span>
+            </button>
+
+            <button 
+              type="button" 
+              onclick="colarDoWhatsAppAuto()" 
+              class="px-2.5 py-1.5 bg-[#25D366] hover:bg-[#20ba59] active:scale-95 text-[#052e16] font-black rounded-lg transition-all flex items-center gap-1 cursor-pointer shadow-md text-xs"
+              title="Importar mensagem colada do WhatsApp se necessário"
+            >
+              <span>📋</span>
+              <span>Colar WhatsApp</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -925,9 +990,19 @@
 
       <!-- Conteúdo 1: Colar Texto do WhatsApp -->
       <div id="conteudoModalColar" class="space-y-3">
-        <p class="text-xs text-gray-400 leading-relaxed">
-          Cole abaixo a mensagem recebida do cliente no WhatsApp. O sistema detectará automaticamente o aluno, as biribas e divisas:
-        </p>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <p class="text-xs text-gray-400 leading-relaxed">
+            Cole a mensagem recebida do WhatsApp ou use o botão para colar automático:
+          </p>
+          <button 
+            type="button" 
+            onclick="colarAreaTransferencia()" 
+            class="px-2.5 py-1 bg-[#1a2e1e] hover:bg-[#25422b] text-lime-300 border border-[#2f5536] rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer flex-shrink-0 self-start sm:self-auto"
+          >
+            <span>📋</span>
+            <span>Colar da Área de Transferência</span>
+          </button>
+        </div>
         <textarea 
           id="textareaWhatsApp" 
           rows="5" 
@@ -1658,7 +1733,7 @@
           : (order.status === 'pronto' ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-amber-950/80 text-amber-300 border border-amber-800 animate-pulse">⚠️ Aguardando envio de aviso</span>` : '');
 
         return `
-          <div class="bg-[#111712] border border-[#2a382c] hover:border-[#3d5240] rounded-xl p-4 shadow-lg transition-all space-y-3">
+          <div id="order-card-${order.id}" class="bg-[#111712] border border-[#2a382c] hover:border-[#3d5240] rounded-xl p-4 shadow-lg transition-all space-y-3">
             <!-- Topo do Card -->
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#222e24] pb-2.5">
               <div class="flex items-center gap-2">
@@ -1918,6 +1993,172 @@ Aguardamos você para a retirada! Muito obrigado pela preferência.`;
       }
     }
 
+    // ==========================================
+    // SINCRONIZAÇÃO E CODIFICAÇÃO DE PEDIDOS (WHATSAPP ↔ PRODUÇÃO)
+    // ==========================================
+    function encodeOrderPayload(order) {
+      try {
+        const compactOrder = {
+          i: order.id,
+          d: order.data,
+          f: order.dataFormatada,
+          c: order.clienteNome,
+          t: order.clienteTelefone,
+          a: order.alunoNome,
+          qa: order.qtyAgasalho || 0,
+          qf: order.qtyFarda || 0,
+          qd: order.qtyDivisa || 0,
+          s: order.serie || '1',
+          qt: order.qtyTurno || 0,
+          tu: order.turno || 'MANHA',
+          q: order.totalQtd || 1,
+          v: order.valorTotal || 0
+        };
+        const jsonStr = JSON.stringify(compactOrder);
+        // Base64 seguro com suporte completo a caracteres UTF-8 (acentos, cedilha)
+        return btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+          return String.fromCharCode(parseInt(p1, 16));
+        }));
+      } catch (e) {
+        console.error("Erro ao codificar payload do pedido:", e);
+        return encodeURIComponent(JSON.stringify(order));
+      }
+    }
+
+    function decodeOrderPayload(str) {
+      try {
+        let jsonStr;
+        try {
+          const raw = decodeURIComponent(str);
+          jsonStr = decodeURIComponent(Array.prototype.map.call(atob(raw), function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          }).join(''));
+        } catch(err1) {
+          try {
+            jsonStr = decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
+              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+          } catch(err2) {
+            jsonStr = decodeURIComponent(str);
+          }
+        }
+        const data = JSON.parse(jsonStr);
+        if (data.i) {
+          return {
+            id: data.i,
+            data: data.d || new Date().toISOString(),
+            dataFormatada: data.f || ('Hoje às ' + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})),
+            clienteNome: data.c || 'Cliente',
+            clienteTelefone: data.t || '',
+            alunoNome: data.a || 'ALUNO CPM',
+            qtyAgasalho: data.qa || 0,
+            qtyFarda: data.qf || 0,
+            qtyDivisa: data.qd || 0,
+            serie: data.s || '1',
+            qtyTurno: data.qt || 0,
+            turno: data.tu || 'MANHA',
+            totalQtd: data.q || ((data.qa||0) + (data.qf||0) + (data.qd||0) + (data.qt||0)),
+            valorTotal: data.v || 0,
+            status: 'a_fazer',
+            notificadoWhatsapp: false,
+            notificadoEm: null
+          };
+        }
+        return data;
+      } catch (e) {
+        console.error("Erro ao decodificar payload do pedido:", e);
+        return null;
+      }
+    }
+
+    // Auto-detectar pedido via URL (?importar=... ou #importar=...)
+    function processarUrlImportacao() {
+      let param = null;
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('importar')) {
+          param = urlParams.get('importar');
+        } else if (window.location.hash && window.location.hash.includes('importar=')) {
+          const parts = window.location.hash.split('importar=');
+          if (parts[1]) param = parts[1].split('&')[0];
+        }
+      } catch (err) {
+        console.error("Erro ao ler parâmetros de importação:", err);
+      }
+
+      if (!param) return;
+
+      const pedido = decodeOrderPayload(param);
+      if (pedido && pedido.id) {
+        const orders = getStoredOrders();
+        const jaExiste = orders.find(o => o.id === pedido.id);
+        if (!jaExiste) {
+          orders.unshift(pedido);
+          saveOrders(orders);
+          showToast(`🎉 Pedido ${pedido.id} (${pedido.alunoNome}) cadastrado na Produção!`, 'success');
+        } else {
+          showToast(`ℹ️ Pedido ${pedido.id} (${pedido.alunoNome}) já está na fila!`, 'info');
+        }
+
+        // Auto login na produção para o lojista
+        sessionStorage.setItem('cpm_admin_auth', ADMIN_PASSWORD);
+
+        // Limpar parâmetros da URL de forma elegante
+        try {
+          if (window.history && window.history.replaceState) {
+            const cleanUrl = window.location.href.split('?')[0].split('#')[0];
+            window.history.replaceState({}, document.title, cleanUrl);
+          }
+        } catch(e) {}
+
+        // Abrir aba de produção e destacar o card do pedido
+        setTimeout(() => {
+          switchTab('admin');
+          const cardElem = document.getElementById(`order-card-${pedido.id}`);
+          if (cardElem) {
+            cardElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            cardElem.classList.add('ring-4', 'ring-lime-400', 'bg-[#182a1d]');
+            setTimeout(() => {
+              cardElem.classList.remove('ring-4', 'ring-lime-400', 'bg-[#182a1d]');
+            }, 3500);
+          }
+        }, 500);
+      }
+    }
+
+    async function colarAreaTransferencia() {
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          const clipText = await navigator.clipboard.readText();
+          if (clipText) {
+            document.getElementById('textareaWhatsApp').value = clipText;
+            showToast("Mensagem colada da área de transferência!", "info");
+            return;
+          }
+        }
+      } catch (err) {
+        console.log("Acesso à área de transferência não concedido:", err);
+      }
+      document.getElementById('textareaWhatsApp').focus();
+    }
+
+    async function colarDoWhatsAppAuto() {
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          const clipText = await navigator.clipboard.readText();
+          if (clipText && (clipText.includes('Evolução Militar') || clipText.includes('Biriba') || clipText.includes('Pedido Nº') || clipText.includes('importar='))) {
+            document.getElementById('textareaWhatsApp').value = clipText;
+            processarTextoWhatsApp();
+            return;
+          }
+        }
+      } catch(e) {
+        console.log("Clipboard API não disponível diretamente, abrindo modal");
+      }
+      openNovoPedidoModal();
+      switchModalTab('colar');
+    }
+
     function processarTextoWhatsApp() {
       const texto = document.getElementById('textareaWhatsApp').value;
       if (!texto.trim()) {
@@ -1925,49 +2166,80 @@ Aguardamos você para a retirada! Muito obrigado pela preferência.`;
         return;
       }
 
-      const clienteNome = document.getElementById('quickClienteNome').value.trim() || 'Cliente WhatsApp';
-      const clienteTelefone = document.getElementById('quickClienteTelefone').value.trim();
+      // 1. Verificar se a mensagem possui um link com payload codificado
+      let payloadFromLink = null;
+      const matchLink = texto.match(/[?#]importar=([a-zA-Z0-9%_\-\.\+=]+)/);
+      if (matchLink && matchLink[1]) {
+        payloadFromLink = decodeOrderPayload(matchLink[1]);
+      }
 
-      let alunoNome = 'ALUNO CPM';
+      let pedidoId = (payloadFromLink && payloadFromLink.id) ? payloadFromLink.id : ('EM-' + Math.floor(1000 + Math.random() * 9000));
+      const matchId = texto.match(/Pedido Nº:\s*([A-Za-z0-9\-]+)/i);
+      if (matchId && matchId[1]) {
+        pedidoId = matchId[1].trim();
+      }
+
+      let clienteNome = document.getElementById('quickClienteNome').value.trim();
+      let clienteTelefone = document.getElementById('quickClienteTelefone').value.trim();
+
+      if (payloadFromLink && payloadFromLink.clienteNome && (!clienteNome || clienteNome === 'Cliente WhatsApp')) {
+        clienteNome = payloadFromLink.clienteNome;
+      }
+      if (payloadFromLink && payloadFromLink.clienteTelefone && !clienteTelefone) {
+        clienteTelefone = payloadFromLink.clienteTelefone;
+      }
+
+      if (!clienteNome || clienteNome === 'Cliente WhatsApp') {
+        const matchCli = texto.match(/Cliente:\s*([^\-\n\r]+)(?:\s*-\s*WhatsApp:\s*([^\n\r]+))?/i);
+        if (matchCli) {
+          if (matchCli[1] && matchCli[1].trim()) clienteNome = matchCli[1].trim();
+          if (matchCli[2] && matchCli[2].trim() && !clienteTelefone) clienteTelefone = matchCli[2].trim();
+        }
+      }
+      if (!clienteNome) clienteNome = 'Cliente WhatsApp';
+
+      let alunoNome = (payloadFromLink && payloadFromLink.alunoNome) ? payloadFromLink.alunoNome : 'ALUNO CPM';
       const matchNome = texto.match(/Nome a bordar na Biriba:\s*([^\n\r]+)/i);
       if (matchNome && matchNome[1]) {
         alunoNome = matchNome[1].trim();
       }
 
-      let qAgasalho = 0;
+      let qAgasalho = payloadFromLink ? payloadFromLink.qtyAgasalho : 0;
       const matchAg = texto.match(/(\d+)x\s*Biriba BRANCA/i);
       if (matchAg) qAgasalho = parseInt(matchAg[1]);
 
-      let qFarda = 0;
+      let qFarda = payloadFromLink ? payloadFromLink.qtyFarda : 0;
       const matchFa = texto.match(/(\d+)x\s*Biriba CINZA/i);
       if (matchFa) qFarda = parseInt(matchFa[1]);
 
-      let qDivisa = 0;
-      let numSerie = '1';
+      let qDivisa = payloadFromLink ? payloadFromLink.qtyDivisa : 0;
+      let numSerie = payloadFromLink ? payloadFromLink.serie : '1';
       const matchDiv = texto.match(/(\d+)x\s*Divisa de Série:\s*Nº\s*(\d+)/i);
       if (matchDiv) {
         qDivisa = parseInt(matchDiv[1]);
         numSerie = matchDiv[2];
       }
 
-      let qTurno = 0;
-      let turnoTipo = 'MANHA';
+      let qTurno = payloadFromLink ? payloadFromLink.qtyTurno : 0;
+      let turnoTipo = payloadFromLink ? payloadFromLink.turno : 'MANHA';
       const matchTur = texto.match(/(\d+)x\s*Divisa de Turno:\s*(MANHÃ|MANHA|TARDE)/i);
       if (matchTur) {
         qTurno = parseInt(matchTur[1]);
         turnoTipo = matchTur[2].toUpperCase().includes('TARDE') ? 'TARDE' : 'MANHA';
       }
 
-      let valorTotal = (qAgasalho * 20) + (qFarda * 20) + (qDivisa * 10) + (qTurno * 10);
+      let valorTotal = payloadFromLink ? payloadFromLink.valorTotal : ((qAgasalho * 20) + (qFarda * 20) + (qDivisa * 10) + (qTurno * 10));
       const matchVal = texto.match(/Valor total:\s*R\$\s*(\d+)/i);
       if (matchVal && parseInt(matchVal[1]) > 0) {
         valorTotal = parseInt(matchVal[1]);
       }
 
+      const totalQtd = qAgasalho + qFarda + qDivisa + qTurno;
+
       const novoPedido = {
-        id: 'EM-' + Math.floor(1000 + Math.random() * 9000),
-        data: new Date().toISOString(),
-        dataFormatada: 'Hoje às ' + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}),
+        id: pedidoId,
+        data: (payloadFromLink && payloadFromLink.data) ? payloadFromLink.data : new Date().toISOString(),
+        dataFormatada: (payloadFromLink && payloadFromLink.dataFormatada) ? payloadFromLink.dataFormatada : ('Hoje às ' + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})),
         clienteNome: clienteNome,
         clienteTelefone: clienteTelefone,
         alunoNome: alunoNome,
@@ -1977,7 +2249,7 @@ Aguardamos você para a retirada! Muito obrigado pela preferência.`;
         serie: numSerie,
         qtyTurno: qTurno,
         turno: turnoTipo,
-        totalQtd: qAgasalho + qFarda + qDivisa + qTurno,
+        totalQtd: totalQtd || 1,
         valorTotal: valorTotal || 20,
         status: 'a_fazer',
         notificadoWhatsapp: false,
@@ -1985,13 +2257,31 @@ Aguardamos você para a retirada! Muito obrigado pela preferência.`;
       };
 
       const orders = getStoredOrders();
-      orders.unshift(novoPedido);
+      const jaExisteIndex = orders.findIndex(o => o.id === novoPedido.id);
+      if (jaExisteIndex >= 0) {
+        orders[jaExisteIndex] = novoPedido;
+        showToast(`Pedido ${novoPedido.id} atualizado na fila!`, 'info');
+      } else {
+        orders.unshift(novoPedido);
+        showToast(`Pedido ${novoPedido.id} (${alunoNome}) cadastrado na fila!`, 'success');
+      }
       saveOrders(orders);
       renderAdminOrders();
 
       closeNovoPedidoModal();
       document.getElementById('textareaWhatsApp').value = '';
-      showToast(`Pedido ${novoPedido.id} (${alunoNome}) cadastrado na fila!`, 'success');
+
+      // Destacar o card cadastrado
+      setTimeout(() => {
+        const cardElem = document.getElementById(`order-card-${novoPedido.id}`);
+        if (cardElem) {
+          cardElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          cardElem.classList.add('ring-4', 'ring-lime-400', 'bg-[#182a1d]');
+          setTimeout(() => {
+            cardElem.classList.remove('ring-4', 'ring-lime-400', 'bg-[#182a1d]');
+          }, 3500);
+        }
+      }, 300);
     }
 
     function salvarPedidoManual() {
@@ -2099,13 +2389,22 @@ Aguardamos você para a retirada! Muito obrigado pela preferência.`;
 
       const contatoTexto = clienteTelefone ? `• Cliente: ${clienteNome} - WhatsApp: ${clienteTelefone}\n` : `• Cliente: ${clienteNome}\n`;
 
+      // Gerar Link Inteligente de Sincronização em 1 Clique para a Produção
+      const baseUrl = window.location.href.split('?')[0].split('#')[0];
+      const payload = encodeOrderPayload(novoPedido);
+      const linkProducao = `${baseUrl}?importar=${encodeURIComponent(payload)}`;
+
       const mensagem = `Olá! Gostaria de encomendar bordados para Colégio Militar no padrão oficial:\n\n` +
         `• Pedido Nº: ${novoPedido.id}\n` +
         contatoTexto +
         `• Nome a bordar na Biriba: ${nomeCompletoAluno}\n` +
         `• Itens solicitados:\n${itensPedido}\n` +
         `• Total: ${totalQtd} item(ns) - Valor total: R$ ${valorTotal},00\n\n` +
-        `Favor confirmar o recebimento do pedido para início da confecção!`;
+        `Favor confirmar o recebimento do pedido para início da confecção!\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `🏭 CADASTRAR NA PRODUÇÃO (1 CLIQUE):\n` +
+        `${linkProducao}\n` +
+        `━━━━━━━━━━━━━━━━━━━━`;
 
       setTimeout(() => {
         window.open(`https://wa.me/5542999538715?text=${encodeURIComponent(mensagem)}`, '_blank');
@@ -2828,6 +3127,7 @@ Aguardamos você para a retirada! Muito obrigado pela preferência.`;
     // Inicialização
     renderAll();
     getStoredOrders();
+    processarUrlImportacao();
   </script>
 </body>
 </html>

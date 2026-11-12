@@ -1,5 +1,5 @@
 // Service Worker Oficial - Simulador de Bordados CPM - Evolução Militar
-const CACHE_NAME = 'cpm-simulador-v1.2';
+const CACHE_NAME = 'cpm-simulador-v2.1';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
