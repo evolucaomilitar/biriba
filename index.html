@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Simulador & Produção de Bordados CPM - Evolução Militar</title>
-  <meta name="description" content="Simulador de Biribas, Divisas de Série e Turno do Colégio Militar com Painel de Controle de Produção, Sincronização em 1 Clique e Relatórios.">
+  <meta name="description" content="Simulador de Biribas, Divisas de Série e Turno do Colégio Militar com Painel de Controle de Produção, Sincronização Automática em Tempo Real e Relatórios.">
   <meta name="theme-color" content="#0b0f0c">
   
   <link rel="manifest" href="manifest.json">
@@ -1426,6 +1426,7 @@
         viewAdmin.classList.remove('hidden');
 
         renderAdminOrders();
+        puxarPedidosNuvemHistorico(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         // Reduzir container para modo simulador do cliente
@@ -1796,7 +1797,7 @@
     }
 
     // ==========================================
-    // FLUXO DE STATUS DA PRODUÇÃO
+    // FLUXO DE STATUS DA PRODUÇÃO (SINCRONIZADO EM TEMPO REAL)
     // ==========================================
     function updateOrderStatus(orderId, newStatus) {
       const orders = getStoredOrders();
@@ -1813,6 +1814,9 @@
         else if (newStatus === 'a_fazer') nomeStatus = 'Retornado para a fila de produção';
 
         showToast(`Ordem ${orderId}: ${nomeStatus}`, 'success');
+
+        // Sincronizar alteração de status em tempo real com a nuvem
+        enviarSyncAcaoNuvem({ tipo: 'ATUALIZAR_STATUS', orderId: orderId, status: newStatus });
       }
     }
 
@@ -1876,6 +1880,9 @@ Aguardamos você para a retirada! Muito obrigado pela preferência.`;
       order.notificadoEm = agora.toLocaleDateString('pt-BR') + ' às ' + agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
       saveOrders(orders);
       renderAdminOrders();
+
+      // Sincronizar aviso na nuvem
+      enviarSyncAcaoNuvem({ tipo: 'ATUALIZAR_NOTIFICADO', orderId: orderId, notificadoEm: order.notificadoEm });
 
       const urlWhatsApp = `https://wa.me/55${telefone}?text=${encodeURIComponent(mensagemPronto)}`;
       window.open(urlWhatsApp, '_blank');
@@ -1949,6 +1956,9 @@ Aguardamos você para a retirada! Muito obrigado pela preferência.`;
       saveOrders(orders);
       renderAdminOrders();
       showToast("Pedido excluído da produção.", "info");
+
+      // Sincronizar exclusão na nuvem
+      enviarSyncAcaoNuvem({ tipo: 'EXCLUIR_PEDIDO', orderId: orderId });
     }
 
     function exportarBackup() {
@@ -1990,6 +2000,275 @@ Aguardamos você para a retirada! Muito obrigado pela preferência.`;
         tabManual.className = "py-2 px-3 border-b-2 border-transparent text-gray-400 hover:text-white cursor-pointer";
         conteudoColar.classList.remove('hidden');
         conteudoManual.classList.add('hidden');
+      }
+    }
+
+    // ==========================================
+    // MOTOR DE SINCRONIZAÇÃO EM NUVEM EM TEMPO REAL (AUTOMÁTICO)
+    // ==========================================
+    const DEFAULT_SYNC_TOPIC = "evolucaomilitar_cpm_producao";
+    function getSyncTopic() {
+      return localStorage.getItem('cpm_sync_channel') || DEFAULT_SYNC_TOPIC;
+    }
+
+    // Sinal Sonoro Harmonioso com Web Audio API (Nativo, sem arquivos externos)
+    function tocarSinoNotificacao() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        if (ctx.state === 'suspended') {
+          ctx.resume();
+        }
+        const now = ctx.currentTime;
+        
+        // Tom 1: C5 (523.25 Hz)
+        const osc1 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(523.25, now);
+        gain1.gain.setValueAtTime(0.28, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc1.connect(gain1);
+        gain1.connect(ctx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.35);
+
+        // Tom 2: G5 (783.99 Hz)
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(783.99, now + 0.12);
+        gain2.gain.setValueAtTime(0.32, now + 0.12);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.start(now + 0.12);
+        osc2.stop(now + 0.65);
+      } catch (e) {
+        console.log("Áudio não reproduzido:", e);
+      }
+    }
+
+    // Transmissão para a Nuvem de Novos Pedidos
+    async function enviarPedidoNuvem(pedido) {
+      const topic = getSyncTopic();
+      try {
+        await fetch(`https://ntfy.sh/${topic}`, {
+          method: 'POST',
+          headers: {
+            'Title': `Novo Pedido CPM: ${pedido.alunoNome}`,
+            'Priority': 'urgent',
+            'Tags': 'bell,tada,shopping_cart'
+          },
+          body: JSON.stringify({
+            tipo: 'NOVO_PEDIDO',
+            pedido: pedido,
+            timestamp: Date.now()
+          })
+        });
+        console.log('[Nuvem] Pedido transmitido automaticamente:', pedido.id);
+      } catch (err) {
+        console.warn('[Nuvem] Falha na transmissão direta:', err);
+      }
+    }
+
+    // Transmissão para a Nuvem de Ações (Status, Exclusão, Aviso)
+    async function enviarSyncAcaoNuvem(acao) {
+      const topic = getSyncTopic();
+      try {
+        acao.timestamp = Date.now();
+        await fetch(`https://ntfy.sh/${topic}`, {
+          method: 'POST',
+          headers: {
+            'Priority': 'low',
+            'Tags': 'arrows_counterclockwise'
+          },
+          body: JSON.stringify(acao)
+        });
+        console.log('[Nuvem] Ação sincronizada:', acao.tipo);
+      } catch (err) {
+        console.warn('[Nuvem] Falha ao sincronizar ação:', err);
+      }
+    }
+
+    let cloudEventSource = null;
+    let cloudPollingInterval = null;
+
+    function atualizarStatusConexaoNuvem(status, msg) {
+      const badge = document.getElementById('badgeStatusNuvem');
+      const texto = document.getElementById('textoStatusNuvem');
+      const ponto = document.getElementById('pontoStatusNuvem');
+      if (!badge || !texto) return;
+
+      if (status === 'conectado') {
+        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-600/70 text-emerald-300 text-[11px] font-bold self-start sm:self-auto";
+        if (ponto) ponto.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
+        texto.textContent = msg || "Conectado em Tempo Real";
+      } else if (status === 'conectando') {
+        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-950/80 border border-amber-600/70 text-amber-300 text-[11px] font-bold self-start sm:self-auto";
+        if (ponto) ponto.className = "w-2 h-2 rounded-full bg-amber-400 animate-ping";
+        texto.textContent = msg || "Sincronizando Nuvem...";
+      } else {
+        badge.className = "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gray-900 border border-gray-700 text-gray-400 text-[11px] font-bold self-start sm:self-auto";
+        if (ponto) ponto.className = "w-2 h-2 rounded-full bg-gray-500";
+        texto.textContent = msg || "Modo Local (Offline)";
+      }
+    }
+
+    async function puxarPedidosNuvemHistorico(silencioso = false) {
+      const topic = getSyncTopic();
+      try {
+        const res = await fetch(`https://ntfy.sh/${topic}/json?poll=1&since=24h`);
+        if (!res.ok) return;
+        const text = await res.text();
+        if (!text.trim()) return;
+
+        const lines = text.trim().split('\n');
+        const orders = getStoredOrders();
+        let novos = 0;
+        let alterados = 0;
+
+        lines.forEach(line => {
+          try {
+            const item = JSON.parse(line);
+            if (item.event === 'message' && item.message) {
+              const payload = JSON.parse(item.message);
+              if (payload.tipo === 'NOVO_PEDIDO' && payload.pedido) {
+                const p = payload.pedido;
+                const index = orders.findIndex(o => o.id === p.id);
+                if (index === -1) {
+                  orders.unshift(p);
+                  novos++;
+                }
+              } else if (payload.tipo === 'ATUALIZAR_STATUS' && payload.orderId && payload.status) {
+                const ord = orders.find(o => o.id === payload.orderId);
+                if (ord && ord.status !== payload.status) {
+                  ord.status = payload.status;
+                  alterados++;
+                }
+              } else if (payload.tipo === 'ATUALIZAR_NOTIFICADO' && payload.orderId) {
+                const ord = orders.find(o => o.id === payload.orderId);
+                if (ord && !ord.notificadoWhatsapp) {
+                  ord.notificadoWhatsapp = true;
+                  ord.notificadoEm = payload.notificadoEm || ord.notificadoEm;
+                  alterados++;
+                }
+              } else if (payload.tipo === 'EXCLUIR_PEDIDO' && payload.orderId) {
+                const index = orders.findIndex(o => o.id === payload.orderId);
+                if (index !== -1) {
+                  orders.splice(index, 1);
+                  alterados++;
+                }
+              }
+            }
+          } catch(e) {}
+        });
+
+        if (novos > 0 || alterados > 0) {
+          saveOrders(orders);
+          renderAdminOrders();
+          if (!silencioso && novos > 0) {
+            tocarSinoNotificacao();
+            showToast(`🎉 ${novos} novo(s) pedido(s) sincronizado(s) da nuvem!`, 'success');
+          }
+        }
+        atualizarStatusConexaoNuvem('conectado');
+      } catch (err) {
+        console.warn("[Nuvem] Erro no polling de histórico:", err);
+      }
+    }
+
+    function conectarRealtimeNuvem() {
+      const topic = getSyncTopic();
+      if (cloudEventSource) {
+        try { cloudEventSource.close(); } catch(e) {}
+      }
+
+      atualizarStatusConexaoNuvem('conectando');
+
+      // 1. Puxar histórico recente das últimas 24h
+      puxarPedidosNuvemHistorico(true);
+
+      // 2. Conectar EventSource em Tempo Real (SSE)
+      if (window.EventSource) {
+        try {
+          cloudEventSource = new EventSource(`https://ntfy.sh/${topic}/sse`);
+
+          cloudEventSource.onopen = () => {
+            atualizarStatusConexaoNuvem('conectado');
+          };
+
+          cloudEventSource.onerror = () => {
+            atualizarStatusConexaoNuvem('conectando', 'Reconectando à nuvem...');
+          };
+
+          cloudEventSource.onmessage = (event) => {
+            try {
+              const data = JSON.parse(event.data);
+              if (data.event === 'message' && data.message) {
+                const payload = JSON.parse(data.message);
+                processarMensagemNuvemEmTempoReal(payload);
+              }
+            } catch(e) {}
+          };
+        } catch (err) {
+          console.warn("[Nuvem] EventSource não suportado ou bloqueado:", err);
+        }
+      }
+
+      // 3. Heartbeat de segurança a cada 8 segundos
+      if (cloudPollingInterval) clearInterval(cloudPollingInterval);
+      cloudPollingInterval = setInterval(() => {
+        puxarPedidosNuvemHistorico(false);
+      }, 8000);
+    }
+
+    function processarMensagemNuvemEmTempoReal(payload) {
+      const orders = getStoredOrders();
+
+      if (payload.tipo === 'NOVO_PEDIDO' && payload.pedido) {
+        const p = payload.pedido;
+        const index = orders.findIndex(o => o.id === p.id);
+        if (index === -1) {
+          orders.unshift(p);
+          saveOrders(orders);
+          renderAdminOrders();
+          tocarSinoNotificacao();
+          showToast(`🔔 NOVO PEDIDO EM TEMPO REAL: ${p.alunoNome} (${p.id})!`, 'success');
+
+          setTimeout(() => {
+            const card = document.getElementById(`order-card-${p.id}`);
+            if (card) {
+              card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              card.classList.add('ring-4', 'ring-lime-400', 'bg-[#182a1d]');
+              setTimeout(() => card.classList.remove('ring-4', 'ring-lime-400', 'bg-[#182a1d]'), 4000);
+            }
+          }, 300);
+        }
+      } else if (payload.tipo === 'ATUALIZAR_STATUS' && payload.orderId && payload.status) {
+        const ord = orders.find(o => o.id === payload.orderId);
+        if (ord && ord.status !== payload.status) {
+          ord.status = payload.status;
+          saveOrders(orders);
+          renderAdminOrders();
+          showToast(`Status do pedido ${payload.orderId} atualizado em tempo real.`, 'info');
+        }
+      } else if (payload.tipo === 'ATUALIZAR_NOTIFICADO' && payload.orderId) {
+        const ord = orders.find(o => o.id === payload.orderId);
+        if (ord) {
+          ord.notificadoWhatsapp = true;
+          ord.notificadoEm = payload.notificadoEm || ord.notificadoEm;
+          saveOrders(orders);
+          renderAdminOrders();
+        }
+      } else if (payload.tipo === 'EXCLUIR_PEDIDO' && payload.orderId) {
+        const index = orders.findIndex(o => o.id === payload.orderId);
+        if (index !== -1) {
+          orders.splice(index, 1);
+          saveOrders(orders);
+          renderAdminOrders();
+        }
       }
     }
 
@@ -2268,6 +2547,9 @@ Aguardamos você para a retirada! Muito obrigado pela preferência.`;
       saveOrders(orders);
       renderAdminOrders();
 
+      // Sincronizar novo pedido na nuvem automaticamente
+      enviarPedidoNuvem(novoPedido);
+
       closeNovoPedidoModal();
       document.getElementById('textareaWhatsApp').value = '';
 
@@ -2320,6 +2602,9 @@ Aguardamos você para a retirada! Muito obrigado pela preferência.`;
       orders.unshift(novoPedido);
       saveOrders(orders);
       renderAdminOrders();
+
+      // Sincronizar na nuvem automaticamente
+      enviarPedidoNuvem(novoPedido);
 
       closeNovoPedidoModal();
       showToast(`Pedido ${novoPedido.id} cadastrado na fila!`, 'success');
@@ -2375,6 +2660,9 @@ Aguardamos você para a retirada! Muito obrigado pela preferência.`;
       saveOrders(orders);
 
       showToast(`Pedido gravado na Fila de Produção (${novoPedido.id})!`, 'success');
+
+      // Transmissão Automática para a Nuvem em Tempo Real (Sincroniza Imediatamente na Produção)
+      enviarPedidoNuvem(novoPedido);
 
       // 2. Gerar Mensagem e Abrir WhatsApp da Loja
       let itensPedido = '';
@@ -3128,6 +3416,7 @@ Aguardamos você para a retirada! Muito obrigado pela preferência.`;
     renderAll();
     getStoredOrders();
     processarUrlImportacao();
+    conectarRealtimeNuvem();
   </script>
 </body>
 </html>
