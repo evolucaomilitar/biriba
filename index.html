@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Simulador & Produção de Bordados CPM - Evolução Militar</title>
-  <meta name="description" content="Simulador de Biribas, Divisas de Série e Turno do Colégio Militar com Painel de Controle de Produção, Sincronização Automática em Tempo Real e Relatórios.">
+  <meta name="description" content="Simulador de Biribas, Divisas de Série e Turno do Colégio Militar com Finalização Direta na Tela, Pagamento PIX e Produção em Tempo Real.">
   <meta name="theme-color" content="#0b0f0c">
   
   <link rel="manifest" href="manifest.json">
@@ -580,14 +580,38 @@
           </div>
         </div>
 
-        <!-- Botão Direto para o WhatsApp e Registro na Produção -->
+        <!-- Opção de Pagamento com PIX -->
+        <div class="bg-[#101c15] border border-[#2d5238] rounded-xl p-3 flex items-center justify-between gap-2.5 shadow-md">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-lg bg-[#183622] border border-[#3b724b] flex items-center justify-center text-teal-400 text-lg flex-shrink-0">
+              💠
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <strong class="text-white text-xs font-bold uppercase tracking-wide">PAGAR COM PIX</strong>
+                <span class="text-[9px] bg-teal-950 text-teal-300 border border-teal-800 px-1.5 py-0.2 rounded font-mono font-bold">42999538715</span>
+              </div>
+              <span class="text-[11px] text-gray-300 font-mono block">Chave Celular • Evolução Militar</span>
+            </div>
+          </div>
+          <button 
+            type="button" 
+            onclick="abrirModalPix()" 
+            class="px-3 py-2 bg-[#00bdae] hover:bg-[#00a396] active:scale-95 text-black font-black text-xs rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-md flex-shrink-0"
+          >
+            <span>💠</span>
+            <span>Pagar no Pix</span>
+          </button>
+        </div>
+
+        <!-- Botão Direto para Conclusão e Registro na Produção (Sem Abrir WhatsApp) -->
         <button 
           id="btnWhatsApp"
           type="button" 
           onclick="encomendarEGravarPedido()" 
           class="w-full py-4 px-4 bg-[#1c261e] text-gray-400 border border-[#2a382c] font-extrabold text-sm sm:text-base rounded-xl shadow-xl transition-all flex items-center justify-center gap-2 text-center cursor-pointer"
         >
-          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+          <span class="text-lg">🛍️</span>
           <span id="btnText">ESCOLHA A QUANTIDADE DOS ITENS ACIMA (+)</span>
         </button>
 
@@ -916,6 +940,181 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- ================================================================ -->
+  <!--             MODAL DEDICADO: PAGAMENTO VIA PIX                   -->
+  <!-- ================================================================ -->
+  <div id="modalPix" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#131a15] border border-[#2a382c] rounded-2xl max-w-sm w-full p-5 sm:p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-[#2a382c] pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">💠</span>
+          <h3 class="text-sm sm:text-base font-black text-white uppercase tracking-wider">
+            PAGAMENTO VIA PIX
+          </h3>
+        </div>
+        <button onclick="fecharModalPix()" class="text-gray-400 hover:text-white text-lg cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-3">
+        <!-- Card da Chave PIX -->
+        <div class="bg-[#0b100d] border border-[#25422e] rounded-xl p-4 text-center space-y-2">
+          <span class="text-[10px] text-gray-400 uppercase font-mono tracking-widest block">Chave Pix Oficial (Telefone)</span>
+          <div class="text-xl sm:text-2xl font-black text-lime-400 font-mono tracking-wider select-all py-1">
+            42999538715
+          </div>
+          <span class="text-xs text-gray-300 block">Beneficiário: <strong>Evolução Militar</strong></span>
+          <span id="pixModalValor" class="text-sm font-extrabold text-[#f0c20a] font-mono block">Chave Celular: (42) 99953-8715</span>
+        </div>
+
+        <!-- Botão Copiar Chave -->
+        <button 
+          type="button" 
+          onclick="copiarChavePix()" 
+          class="w-full py-3 px-4 bg-[#00bdae] hover:bg-[#00a396] active:scale-95 text-black font-black text-xs sm:text-sm rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg cursor-pointer"
+        >
+          <span>📋</span>
+          <span>COPIAR CHAVE PIX (42999538715)</span>
+        </button>
+
+        <!-- Instruções Rápidas -->
+        <div class="bg-[#0e1410] border border-[#202c22] rounded-lg p-3 text-[11px] text-gray-300 space-y-1.5 leading-relaxed">
+          <div class="flex items-start gap-2">
+            <span class="font-bold text-lime-400">1.</span>
+            <span>Clique no botão acima para copiar a chave Pix.</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="font-bold text-lime-400">2.</span>
+            <span>Abra o app do seu banco e escolha <strong>Pix > Pagar com Chave (Celular)</strong>.</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="font-bold text-lime-400">3.</span>
+            <span>Cole o número <strong>42999538715</strong>, confira o nome <strong>Evolução Militar</strong> e realize o pagamento.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2">
+        <button 
+          type="button" 
+          onclick="fecharModalPix()" 
+          class="w-full py-2.5 bg-[#1c261e] hover:bg-[#253328] border border-[#2a382c] text-gray-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
+        >
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================ -->
+  <!--        NOVO MODAL: PEDIDO REALIZADO COM SUCESSO (SEM WHATSAPP)   -->
+  <!-- ================================================================ -->
+  <div id="modalSucessoPedido" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
+    <div class="bg-[#131a15] border border-[#2d5236] rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+      
+      <!-- Topo Comemorativo -->
+      <div class="text-center space-y-1.5 pb-2 border-b border-[#223326]">
+        <div class="w-14 h-14 rounded-full bg-[#1a3824] border-2 border-[#39784e] flex items-center justify-center text-3xl mx-auto shadow-lg animate-bounce">
+          ✅
+        </div>
+        <h3 class="text-base sm:text-lg font-black text-white uppercase tracking-wider">
+          PEDIDO REALIZADO COM SUCESSO!
+        </h3>
+        <p class="text-xs text-lime-400 font-mono">
+          Evolução Militar • Setor de Confecção CPM
+        </p>
+      </div>
+
+      <!-- Caixa de Resumo do Pedido -->
+      <div class="bg-[#0b100d] border border-[#202c22] rounded-xl p-3.5 space-y-2.5 text-xs">
+        <div class="flex items-center justify-between border-b border-[#1b261d] pb-2">
+          <span class="text-gray-400">Número do Pedido:</span>
+          <span id="sucessoPedidoNumero" class="font-mono font-black text-white bg-[#19241c] px-2 py-0.5 rounded border border-[#2b3d2f]">EM-0000</span>
+        </div>
+
+        <div class="flex items-center justify-between border-b border-[#1b261d] pb-2">
+          <span class="text-gray-400">Nome a Bordar:</span>
+          <strong id="sucessoPedidoAluno" class="text-lime-300 font-bold uppercase">ALUNA MONIQUE</strong>
+        </div>
+
+        <div class="space-y-1">
+          <span class="text-[10px] text-gray-400 font-mono uppercase block">Itens Solicitados:</span>
+          <div id="sucessoPedidoItens" class="space-y-1 text-gray-200 text-[11px]">
+            <!-- Injetado via JS -->
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-2 border-t border-[#1b261d]">
+          <span class="text-gray-300 font-bold">Valor Total:</span>
+          <span id="sucessoPedidoValor" class="text-base font-black text-[#86efac] font-mono">R$ 0,00</span>
+        </div>
+      </div>
+
+      <!-- SEÇÃO PIX INTEGRADA NA CONFIRMAÇÃO -->
+      <div class="bg-[#101c15] border border-[#264a32] rounded-xl p-3.5 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-black text-white uppercase flex items-center gap-1.5">
+            <span>💠</span>
+            <span>Pagar Agora com PIX:</span>
+          </span>
+          <span class="text-[10px] text-teal-300 font-mono font-bold bg-teal-950/80 px-2 py-0.5 rounded border border-teal-800">Agiliza Produção</span>
+        </div>
+
+        <div class="bg-[#0b100d] border border-[#1b2e21] rounded-lg p-2.5 flex items-center justify-between">
+          <div>
+            <span class="text-[10px] text-gray-400 font-mono block">Chave Pix (Telefone):</span>
+            <strong class="text-sm font-mono text-lime-400 tracking-wider">42999538715</strong>
+          </div>
+          <button 
+            type="button" 
+            onclick="copiarChavePix()" 
+            class="px-3 py-1.5 bg-[#00bdae] hover:bg-[#00a396] active:scale-95 text-black font-black text-xs rounded-lg transition-all flex items-center gap-1 cursor-pointer shadow-sm"
+          >
+            <span>📋</span>
+            <span>Copiar</span>
+          </button>
+        </div>
+        <p class="text-[10px] text-gray-400 leading-tight">
+          Beneficiário: <strong>Evolução Militar</strong>. Pague pelo app do seu banco com a chave acima.
+        </p>
+      </div>
+
+      <!-- Local de Retirada e Informações -->
+      <div class="bg-[#0e1410] border border-[#202c22] rounded-xl p-3 text-[11px] text-gray-300 space-y-1">
+        <div class="flex items-center gap-1.5 text-white font-bold">
+          <span>📍</span>
+          <span>Local de Retirada:</span>
+        </div>
+        <p class="text-gray-300 pl-4 font-sans leading-tight">
+          Evolução Militar • Rua Dr. Cruz Machado, 159
+        </p>
+        <p class="text-[10px] text-gray-400 pl-4 pt-1">
+          Assim que seus bordados estiverem prontos para retirada, você receberá um aviso no seu WhatsApp!
+        </p>
+      </div>
+
+      <!-- Botões de Ação do Modal -->
+      <div class="space-y-2 pt-1">
+        <button 
+          type="button" 
+          onclick="fecharModalSucessoPedido(true)" 
+          class="w-full py-3 bg-[#233827] hover:bg-[#344d37] border border-[#3b593f] text-[#86efac] font-black text-xs sm:text-sm rounded-xl transition-all cursor-pointer shadow-md flex items-center justify-center gap-2"
+        >
+          <span>✨</span>
+          <span>Concluir e Fazer Nova Encomenda</span>
+        </button>
+
+        <a 
+          href="https://wa.me/5542999538715" 
+          target="_blank" 
+          class="w-full py-2 bg-[#121a14] hover:bg-[#1a251d] border border-[#223326] text-gray-300 hover:text-white font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2 text-center"
+        >
+          <span>💬</span>
+          <span>Dúvidas? Falar com a Evolução Militar</span>
+        </a>
+      </div>
+    </div>
   </div>
 
   <!-- ================================================================ -->
@@ -2664,39 +2863,79 @@ Aguardamos você para a retirada! Muito obrigado pela preferência.`;
       // Transmissão Automática para a Nuvem em Tempo Real (Sincroniza Imediatamente na Produção)
       enviarPedidoNuvem(novoPedido);
 
-      // 2. Gerar Mensagem e Abrir WhatsApp da Loja
-      let itensPedido = '';
-      if (qtyAgasalho > 0) itensPedido += `   • ${qtyAgasalho}x Biriba BRANCA com AZUL (Agasalho) - R$ ${qtyAgasalho * 20},00\n`;
-      if (qtyFarda > 0) itensPedido += `   • ${qtyFarda}x Biriba CINZA com AMARELO (Farda) - R$ ${qtyFarda * 20},00\n`;
-      if (qtyDivisa > 0) itensPedido += `   • ${qtyDivisa}x Divisa de Série: Nº ${currentSerie} (${serieDesc}) - R$ ${qtyDivisa * 10},00\n`;
-      if (qtyTurno > 0) {
-        const descCorTurno = currentTurno === 'TARDE' ? 'Vermelho' : 'Azul Royal';
-        const nomeTurno = currentTurno === 'TARDE' ? 'TARDE' : 'MANHÃ';
-        itensPedido += `   • ${qtyTurno}x Divisa de Turno: ${nomeTurno} (Bordado em ${descCorTurno}) - R$ ${qtyTurno * 10},00\n`;
+      // 2. Finalizar abrindo o Modal de Sucesso com os dados do Pedido e Chave PIX (Sem abrir WhatsApp)
+      abrirModalSucessoPedido(novoPedido);
+    }
+
+    // ==========================================
+    // FUNÇÕES DE PAGAMENTO VIA PIX & CONFIRMAÇÃO DE PEDIDO
+    // ==========================================
+    function copiarChavePix() {
+      const chave = "42999538715";
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(chave).then(() => {
+          showToast("Chave PIX copiada: 42999538715", "success");
+        }).catch(() => {
+          prompt("Chave PIX (copie abaixo):", chave);
+        });
+      } else {
+        prompt("Chave PIX (copie abaixo):", chave);
       }
+    }
 
-      const contatoTexto = clienteTelefone ? `• Cliente: ${clienteNome} - WhatsApp: ${clienteTelefone}\n` : `• Cliente: ${clienteNome}\n`;
+    function abrirModalPix() {
+      const valorTotal = (qtyAgasalho * 20) + (qtyFarda * 20) + (qtyDivisa * 10) + (qtyTurno * 10);
+      const valEl = document.getElementById('pixModalValor');
+      if (valEl) {
+        valEl.textContent = valorTotal > 0 ? `Valor Atual dos Itens: R$ ${valorTotal},00` : `Chave Celular: (42) 99953-8715`;
+      }
+      document.getElementById('modalPix').classList.remove('hidden');
+    }
 
-      // Gerar Link Inteligente de Sincronização em 1 Clique para a Produção
-      const baseUrl = window.location.href.split('?')[0].split('#')[0];
-      const payload = encodeOrderPayload(novoPedido);
-      const linkProducao = `${baseUrl}?importar=${encodeURIComponent(payload)}`;
+    function fecharModalPix() {
+      document.getElementById('modalPix').classList.add('hidden');
+    }
 
-      const mensagem = `Olá! Gostaria de encomendar bordados para Colégio Militar no padrão oficial:\n\n` +
-        `• Pedido Nº: ${novoPedido.id}\n` +
-        contatoTexto +
-        `• Nome a bordar na Biriba: ${nomeCompletoAluno}\n` +
-        `• Itens solicitados:\n${itensPedido}\n` +
-        `• Total: ${totalQtd} item(ns) - Valor total: R$ ${valorTotal},00\n\n` +
-        `Favor confirmar o recebimento do pedido para início da confecção!\n\n` +
-        `━━━━━━━━━━━━━━━━━━━━\n` +
-        `🏭 CADASTRAR NA PRODUÇÃO (1 CLIQUE):\n` +
-        `${linkProducao}\n` +
-        `━━━━━━━━━━━━━━━━━━━━`;
+    function abrirModalSucessoPedido(pedido) {
+      document.getElementById('sucessoPedidoNumero').textContent = pedido.id;
+      document.getElementById('sucessoPedidoAluno').textContent = pedido.alunoNome;
+      document.getElementById('sucessoPedidoValor').textContent = `R$ ${pedido.valorTotal},00`;
 
-      setTimeout(() => {
-        window.open(`https://wa.me/5542999538715?text=${encodeURIComponent(mensagem)}`, '_blank');
-      }, 500);
+      let itensHtml = '';
+      if (pedido.qtyAgasalho > 0) {
+        itensHtml += `<div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#132c8c]"></span><strong>${pedido.qtyAgasalho}x</strong> Biriba Agasalho (Branca/Azul) - R$ ${pedido.qtyAgasalho * 20},00</div>`;
+      }
+      if (pedido.qtyFarda > 0) {
+        itensHtml += `<div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#f0c20a]"></span><strong>${pedido.qtyFarda}x</strong> Biriba Farda (Cinza/Amarelo) - R$ ${pedido.qtyFarda * 20},00</div>`;
+      }
+      if (pedido.qtyDivisa > 0) {
+        itensHtml += `<div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span><strong>${pedido.qtyDivisa}x</strong> Divisa Série Nº ${pedido.serie} - R$ ${pedido.qtyDivisa * 10},00</div>`;
+      }
+      if (pedido.qtyTurno > 0) {
+        const corTurno = pedido.turno === 'TARDE' ? 'bg-[#dc2626]' : 'bg-[#132c8c]';
+        itensHtml += `<div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full ${corTurno}"></span><strong>${pedido.qtyTurno}x</strong> Divisa Turno ${pedido.turno} - R$ ${pedido.qtyTurno * 10},00</div>`;
+      }
+      document.getElementById('sucessoPedidoItens').innerHTML = itensHtml || '<div>1x Kit de Bordados CPM</div>';
+
+      document.getElementById('modalSucessoPedido').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function fecharModalSucessoPedido(reset = false) {
+      document.getElementById('modalSucessoPedido').classList.add('hidden');
+      if (reset) {
+        qtyAgasalho = 0;
+        qtyFarda = 0;
+        qtyDivisa = 0;
+        qtyTurno = 0;
+        document.getElementById('qtyAgasalho').textContent = '0';
+        document.getElementById('qtyFarda').textContent = '0';
+        document.getElementById('qtyDivisa').textContent = '0';
+        document.getElementById('qtyTurno').textContent = '0';
+        renderAll();
+        showToast("Você já pode realizar uma nova encomenda!", "info");
+      }
+    }
     }
 
     // ==========================================
@@ -3308,8 +3547,8 @@ Aguardamos você para a retirada! Muito obrigado pela preferência.`;
         btnText.textContent = `ESCOLHA A QUANTIDADE DOS ITENS ACIMA (+)`;
         btnWhatsApp.className = "w-full py-4 px-4 bg-[#1c261e] text-gray-400 border border-[#2a382c] font-extrabold text-sm sm:text-base rounded-xl shadow-xl transition-all flex items-center justify-center gap-2 text-center cursor-pointer opacity-75";
       } else {
-        btnText.textContent = `ENCOMENDAR ${totalQtd} ITEM${totalQtd > 1 ? 'S' : ''} (R$ ${valorTotal},00)`;
-        btnWhatsApp.className = "w-full py-4 px-4 bg-[#25D366] hover:bg-[#20ba59] active:scale-[0.98] text-[#052e16] font-extrabold text-sm sm:text-base rounded-xl shadow-xl hover:shadow-green-900/40 transition-all flex items-center justify-center gap-2 text-center cursor-pointer";
+        btnText.textContent = `FINALIZAR PEDIDO (${totalQtd} ITEM${totalQtd > 1 ? 'S' : ''} - R$ ${valorTotal},00)`;
+        btnWhatsApp.className = "w-full py-4 px-4 bg-[#25D366] hover:bg-[#20ba59] active:scale-[0.98] text-[#052e16] font-black text-sm sm:text-base rounded-xl shadow-xl hover:shadow-green-900/40 transition-all flex items-center justify-center gap-2 text-center cursor-pointer";
       }
     }
 
