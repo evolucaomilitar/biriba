@@ -215,7 +215,7 @@
             <!-- Moldura da Biriba -->
             <div 
               id="biribaContainer" 
-              class="w-[360px] h-[80px] max-w-full fabric-agasalho biriba-frame rounded-sm flex flex-col items-center justify-center relative select-none shadow-2xl transition-all"
+              class="w-[360px] h-[84px] max-w-full fabric-agasalho biriba-frame rounded-sm flex flex-col items-center justify-center relative select-none shadow-2xl transition-all"
             >
               <!-- Pesponto interno -->
               <div 
@@ -223,15 +223,17 @@
                 class="absolute inset-[3px] border border-dashed border-[#132c8c]/25 pointer-events-none rounded-[1px] transition-all"
               ></div>
 
-              <!-- Texto Bordado: Posto em Cima e Nome do Aluno em Baixo (Padrão Oficial CPM) -->
+              <!-- Texto Bordado: Posto em Cima e Nome do Aluno em Baixo (Padrão Oficial CPM - Letras Grandes e Destaque) -->
               <div class="flex flex-col items-center justify-center z-10 px-2 w-full text-center overflow-hidden">
                 <div 
                   id="displayPosto" 
-                  class="embroidered-text uppercase tracking-wider whitespace-nowrap leading-[0.98] text-center"
+                  class="embroidered-text uppercase tracking-wider whitespace-nowrap leading-[0.92] text-center font-black"
+                  style="font-size: 28px;"
                 >ALUNA</div>
                 <div 
                   id="displayNome" 
-                  class="embroidered-text uppercase tracking-wider whitespace-nowrap leading-[0.98] text-center mt-0.5"
+                  class="embroidered-text uppercase tracking-wider whitespace-nowrap leading-[0.92] text-center mt-0.5 font-black"
+                  style="font-size: 30px;"
                 >MONIQUE</div>
               </div>
             </div>
@@ -2936,10 +2938,9 @@ Aguardamos você para a retirada! Muito obrigado pela preferência.`;
         showToast("Você já pode realizar uma nova encomenda!", "info");
       }
     }
-    }
 
     // ==========================================
-    // SISTEMA DE RELATÓRIO: FEITOS vs A BORDAR
+    // SISTEMA DE RELATÓRIO: FEITOS vs A BORDAR (ATIVO)
     // ==========================================
     function openRelatorioModal() {
       document.getElementById('modalRelatorio').classList.remove('hidden');
@@ -3334,7 +3335,7 @@ Aguardamos você para a retirada! Muito obrigado pela preferência.`;
 
       if (modelo === 'FARDA') {
         root.style.setProperty('--cor-linha', '#f0c20a');
-        container.className = "w-[360px] h-[80px] max-w-full fabric-farda biriba-frame rounded-sm flex flex-col items-center justify-center relative select-none shadow-2xl transition-all";
+        container.className = "w-[360px] h-[84px] max-w-full fabric-farda biriba-frame rounded-sm flex flex-col items-center justify-center relative select-none shadow-2xl transition-all";
         innerStitch.style.borderColor = 'rgba(240, 194, 10, 0.3)';
 
         btnFarda.className = "py-2 px-2 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-0.5 text-center bg-[#233827] border-[#4d7c0f] text-[#86efac] shadow-md cursor-pointer";
@@ -3344,7 +3345,7 @@ Aguardamos você para a retirada! Muito obrigado pela preferência.`;
         badgeModelo.className = "text-yellow-400 font-semibold uppercase";
       } else {
         root.style.setProperty('--cor-linha', '#132c8c');
-        container.className = "w-[360px] h-[80px] max-w-full fabric-agasalho biriba-frame rounded-sm flex flex-col items-center justify-center relative select-none shadow-2xl transition-all";
+        container.className = "w-[360px] h-[84px] max-w-full fabric-agasalho biriba-frame rounded-sm flex flex-col items-center justify-center relative select-none shadow-2xl transition-all";
         innerStitch.style.borderColor = 'rgba(19, 44, 140, 0.25)';
 
         btnAgasalho.className = "py-2 px-2 rounded-xl text-xs font-bold border transition-all flex flex-col items-center gap-0.5 text-center bg-[#233827] border-[#4d7c0f] text-[#86efac] shadow-md cursor-pointer";
@@ -3492,42 +3493,56 @@ Aguardamos você para a retirada! Muito obrigado pela preferência.`;
 
       displayNome.textContent = nome;
 
-      let uniformSize = '24px';
-      let uniformSpacing = '0.5px';
-
       if (currentPosto) {
-        // Modo com 2 Linhas: Posto em Cima + Nome do Aluno em Baixo
-        if (nome.length > 12) {
-          uniformSize = '17px';
+        // Modo com 2 Linhas: Posto em Cima + Nome do Aluno em Baixo (Padrão Oficial CPM - Letras Grandes e Destaque)
+        let postoSize = '28px';
+        let nomeSize = '30px';
+        let uniformSpacing = '0.5px';
+
+        if (nome.length > 13) {
+          postoSize = '20px';
+          nomeSize = '20px';
           uniformSpacing = '-0.5px';
-        } else if (nome.length > 9) {
-          uniformSize = '20px';
+        } else if (nome.length > 10) {
+          postoSize = '23px';
+          nomeSize = '23px';
+          uniformSpacing = '-0.2px';
+        } else if (nome.length > 8) {
+          postoSize = '25px';
+          nomeSize = '26px';
           uniformSpacing = '0px';
-        } else if (nome.length > 7) {
-          uniformSize = '22px';
-          uniformSpacing = '0.3px';
         } else {
-          uniformSize = '24px';
+          // Nomes padrões e comuns (MONIQUE [7], HENRIQUE [8], SZESZ [5], SANTOS [6], SILVA [5], etc.)
+          postoSize = '28px';
+          nomeSize = '30px';
           uniformSpacing = '0.5px';
         }
-        displayNome.style.fontSize = uniformSize;
-        displayNome.style.letterSpacing = uniformSpacing;
-        displayPosto.style.fontSize = uniformSize;
+
+        displayPosto.style.fontSize = postoSize;
         displayPosto.style.letterSpacing = uniformSpacing;
+        displayNome.style.fontSize = nomeSize;
+        displayNome.style.letterSpacing = uniformSpacing;
       } else {
         // Modo Sem Título: Apenas 1 Linha centralizada
-        if (nome.length > 12) {
-          uniformSize = '22px';
-          uniformSpacing = '-0.5px';
-        } else if (nome.length > 9) {
-          uniformSize = '25px';
-          uniformSpacing = '0px';
+        let singleSize = '32px';
+        let singleSpacing = '0.5px';
+
+        if (nome.length > 13) {
+          singleSize = '22px';
+          singleSpacing = '-0.5px';
+        } else if (nome.length > 10) {
+          singleSize = '25px';
+          singleSpacing = '-0.2px';
+        } else if (nome.length > 8) {
+          singleSize = '28px';
+          singleSpacing = '0px';
         } else {
-          uniformSize = '28px';
-          uniformSpacing = '0.5px';
+          singleSize = '32px';
+          singleSpacing = '0.5px';
         }
-        displayNome.style.fontSize = uniformSize;
-        displayNome.style.letterSpacing = uniformSpacing;
+
+        displayNome.style.fontSize = singleSize;
+        displayNome.style.letterSpacing = singleSpacing;
       }
 
       // 2. Divisa de Série
