@@ -1,7 +1,7 @@
 {
-  "name": "Simulador de Biribas & Produção CPM - Evolução Militar",
-  "short_name": "Bordados CPM",
-  "description": "Simulador oficial de biribas, divisas de série e turno do Colégio Militar com painel de produção e relatórios.",
+  "name": "Simulador de Biribas 7º CPM - Evolução Militar",
+  "short_name": "Bordados 7º CPM",
+  "description": "Simulador oficial de biribas, divisas de série e turno do 7º Colégio da Polícia Militar do Paraná com painel de produção e finalização direta.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -12,14 +12,20 @@
   "categories": ["shopping", "business", "utilities"],
   "icons": [
     {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "brasao_cpm.png",
+      "sizes": "640x640",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
       "src": "icon.svg",
-      "sizes": "192x192 512x512",
+      "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }

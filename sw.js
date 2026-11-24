@@ -1,10 +1,13 @@
 // Service Worker Oficial - Simulador de Bordados CPM - Evolução Militar
-const CACHE_NAME = 'cpm-simulador-v2.2';
+const CACHE_NAME = 'cpm-simulador-v2.4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
-  './icon.svg'
+  './icon.svg',
+  './icon.png',
+  './brasao_cpm.png',
+  './logo_loja_badge.png'
 ];
 
 // Instalação do Service Worker e Pré-cache dos Arquivos

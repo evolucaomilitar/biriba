@@ -8,11 +8,12 @@
   <meta name="theme-color" content="#0b0f0c">
   
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="brasao_cpm.png">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
-  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="apple-touch-icon" href="brasao_cpm.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Bordados CPM">
+  <meta name="apple-mobile-web-app-title" content="Bordados 7º CPM">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -108,10 +109,21 @@
   <!-- CONTAINER PRINCIPAL DO APLICATIVO -->
   <div id="mainAppContainer" class="max-w-md w-full bg-[#131a15] border border-[#2a382c] rounded-2xl shadow-2xl overflow-hidden mx-auto my-2 sm:my-4 transition-all duration-300">
     
-    <!-- CABEÇALHO OFICIAL EVOLUÇÃO MILITAR (EM UMA LINHA, SEM VALORES) -->
-    <div class="bg-[#0c120e] border-b border-[#2a382c] px-4 py-3.5 flex items-center justify-center text-center">
-      <div class="text-xl sm:text-2xl font-black tracking-widest text-[#f0c20a] uppercase leading-none font-sans drop-shadow-sm">
-        EVOLUÇÃO MILITAR
+    <!-- CABEÇALHO OFICIAL COM BRASÃO DO 7º COLÉGIO DA POLÍCIA MILITAR (OFICIAL) -->
+    <div class="bg-[#0c120e] border-b border-[#2a382c] px-4 py-3 flex items-center justify-center gap-3 sm:gap-3.5 text-center">
+      <img 
+        src="brasao_cpm.png" 
+        alt="7º Colégio da Polícia Militar do Paraná - União da Vitória" 
+        class="w-12 h-12 sm:w-14 sm:h-14 object-contain rounded-full drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] border border-amber-400/40 flex-shrink-0"
+      >
+      <div class="flex flex-col items-center sm:items-start text-center sm:text-left">
+        <div class="text-xl sm:text-2xl font-black tracking-widest text-[#f0c20a] uppercase leading-tight font-sans drop-shadow-sm">
+          EVOLUÇÃO MILITAR
+        </div>
+        <div class="text-[10px] sm:text-xs font-black text-gray-300 uppercase tracking-wider flex items-center gap-1.5 mt-0.5">
+          <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-blue-500 inline-block flex-shrink-0"></span>
+          <span>7º CPM • UNIÃO DA VITÓRIA - PR</span>
+        </div>
       </div>
     </div>
 
@@ -633,11 +645,14 @@
               href="https://wa.me/5542999538715" 
               target="_blank" 
               rel="noopener noreferrer" 
-              class="flex items-center justify-between p-2.5 rounded-lg bg-[#121a14] hover:bg-[#19241c] border border-[#223326] hover:border-emerald-500/50 transition-all text-xs group"
+              class="flex items-center justify-between p-2.5 rounded-lg bg-[#121a14] hover:bg-[#19241c] border border-[#223326] hover:border-emerald-500/50 transition-all text-xs group shadow-sm"
             >
               <div class="flex items-center gap-2.5">
-                <div class="w-7 h-7 rounded-md bg-[#25D366]/15 border border-[#25D366]/30 flex items-center justify-center text-sm flex-shrink-0">
-                  💬
+                <div class="w-8 h-8 rounded-lg bg-[#25D366]/15 border border-[#25D366]/30 flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12c0 1.82.49 3.53 1.35 5L2 22l5.17-1.32C8.61 21.53 10.26 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" fill="#25D366"/>
+                    <path d="M17.05 14.38c-.28-.14-1.65-.81-1.9-.9-.26-.1-.44-.14-.63.14-.19.28-.73.9-.9 1.09-.16.19-.33.21-.61.07-.28-.14-1.2-.44-2.28-1.41-.84-.75-1.41-1.68-1.58-1.96-.16-.28-.02-.43.12-.57.13-.13.28-.33.42-.49.14-.17.19-.28.28-.47.09-.19.05-.35-.02-.49-.07-.14-.63-1.52-.86-2.09-.23-.55-.46-.48-.63-.49h-.54c-.19 0-.49.07-.74.35-.26.28-.98.96-.98 2.34s1 2.72 1.14 2.91c.14.19 1.97 3.01 4.77 4.22.67.29 1.19.46 1.6.6.67.21 1.28.18 1.76.11.54-.08 1.65-.67 1.88-1.33.24-.65.24-1.21.17-1.33-.07-.11-.26-.18-.54-.32z" fill="#ffffff"/>
+                  </svg>
                 </div>
                 <div class="text-left leading-tight">
                   <span class="block text-gray-400 text-[10px] font-mono uppercase">WhatsApp Oficial</span>
@@ -647,35 +662,48 @@
               <span class="text-[10px] text-emerald-400 font-bold group-hover:underline flex-shrink-0">Conversar →</span>
             </a>
 
-            <!-- 2. SITE OFICIAL -->
+            <!-- 2. SITE OFICIAL (LOGO EVOLUÇÃO MILITAR UNIÃO DA VITÓRIA - OFICIAL) -->
             <a 
               href="https://www.evolucaomilitar.com.br" 
               target="_blank" 
               rel="noopener noreferrer" 
-              class="flex items-center justify-between p-2.5 rounded-lg bg-[#121a14] hover:bg-[#19241c] border border-[#223326] hover:border-amber-500/50 transition-all text-xs group"
+              class="flex items-center justify-between p-2.5 rounded-lg bg-[#121a14] hover:bg-[#19241c] border border-[#223326] hover:border-amber-500/50 transition-all text-xs group shadow-sm"
             >
               <div class="flex items-center gap-2.5">
-                <div class="w-7 h-7 rounded-md bg-[#f0c20a]/15 border border-[#f0c20a]/30 flex items-center justify-center text-sm flex-shrink-0">
-                  🌐
+                <div class="w-8 h-8 rounded-lg bg-[#f0c20a]/15 border border-[#f0c20a]/35 p-0.5 flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden">
+                  <img src="logo_loja_badge.png" alt="Evolução Militar" class="w-full h-full object-contain rounded-md">
                 </div>
                 <div class="text-left leading-tight">
-                  <span class="block text-gray-400 text-[10px] font-mono uppercase">Visite nosso site</span>
+                  <span class="block text-gray-400 text-[10px] font-mono uppercase">Loja Virtual Oficial</span>
                   <span class="text-[#f0c20a] font-bold group-hover:underline">www.evolucaomilitar.com.br</span>
                 </div>
               </div>
               <span class="text-[10px] text-[#f0c20a] font-bold group-hover:underline flex-shrink-0">Acessar →</span>
             </a>
 
-            <!-- 3. INSTAGRAM OFICIAL -->
+            <!-- 3. INSTAGRAM OFICIAL (LOGO INSTAGRAM OFICIAL) -->
             <a 
               href="https://www.instagram.com/evolucaomilitar" 
               target="_blank" 
               rel="noopener noreferrer" 
-              class="flex items-center justify-between p-2.5 rounded-lg bg-[#121a14] hover:bg-[#19241c] border border-[#223326] hover:border-pink-500/50 transition-all text-xs group"
+              class="flex items-center justify-between p-2.5 rounded-lg bg-[#121a14] hover:bg-[#19241c] border border-[#223326] hover:border-pink-500/50 transition-all text-xs group shadow-sm"
             >
               <div class="flex items-center gap-2.5">
-                <div class="w-7 h-7 rounded-md bg-pink-500/15 border border-pink-500/30 flex items-center justify-center text-sm flex-shrink-0">
-                  📸
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden p-0.5">
+                  <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <radialGradient id="instaGradCard" cx="30%" cy="107%" r="150%">
+                        <stop offset="0%" stop-color="#fdf497" />
+                        <stop offset="5%" stop-color="#fdf497" />
+                        <stop offset="45%" stop-color="#fd5949" />
+                        <stop offset="60%" stop-color="#d6249f" />
+                        <stop offset="90%" stop-color="#285AEB" />
+                      </radialGradient>
+                    </defs>
+                    <rect x="2" y="2" width="20" height="20" rx="5.5" fill="url(#instaGradCard)" />
+                    <circle cx="12" cy="12" r="4.3" fill="none" stroke="#ffffff" stroke-width="1.8" />
+                    <circle cx="17.2" cy="6.8" r="1.1" fill="#ffffff" />
+                  </svg>
                 </div>
                 <div class="text-left leading-tight">
                   <span class="block text-gray-400 text-[10px] font-mono uppercase">Siga no Instagram</span>
@@ -728,16 +756,19 @@
       
       <!-- Cabeçalho do Painel da Produção com Botão de Voltar ao Simulador -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2a382c] pb-4">
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-amber-400 animate-pulse"></span>
-            <h2 class="text-base sm:text-lg font-black tracking-wider text-white uppercase font-sans">
-              SETOR DE PRODUÇÃO & BORDADOS CPM
-            </h2>
+        <div class="flex items-center gap-3">
+          <img src="brasao_cpm.png" alt="7º CPM" class="w-11 h-11 object-contain rounded-full border border-amber-400/40 shadow-md flex-shrink-0">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+              <h2 class="text-base sm:text-lg font-black tracking-wider text-white uppercase font-sans">
+                SETOR DE PRODUÇÃO • 7º CPM
+              </h2>
+            </div>
+            <p class="text-xs text-gray-400 font-mono mt-0.5">
+              Gestão da Fila de Bordado • 7º Colégio da Polícia Militar • União da Vitória
+            </p>
           </div>
-          <p class="text-xs text-gray-400 font-mono mt-0.5">
-            Gestão da Fila de Bordado • Relatórios • Aviso Automático de Retirada
-          </p>
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
@@ -1016,15 +1047,16 @@
     <div class="bg-[#131a15] border border-[#2d5236] rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
       
       <!-- Topo Comemorativo -->
-      <div class="text-center space-y-1.5 pb-2 border-b border-[#223326]">
-        <div class="w-14 h-14 rounded-full bg-[#1a3824] border-2 border-[#39784e] flex items-center justify-center text-3xl mx-auto shadow-lg animate-bounce">
-          ✅
+      <div class="text-center space-y-2 pb-2 border-b border-[#223326]">
+        <div class="relative inline-block mx-auto">
+          <img src="brasao_cpm.png" alt="7º CPM" class="w-16 h-16 object-contain rounded-full border-2 border-amber-400/80 shadow-xl mx-auto">
+          <span class="absolute -bottom-1 -right-1 bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow-md font-bold">✓</span>
         </div>
         <h3 class="text-base sm:text-lg font-black text-white uppercase tracking-wider">
           PEDIDO REALIZADO COM SUCESSO!
         </h3>
         <p class="text-xs text-lime-400 font-mono">
-          Evolução Militar • Setor de Confecção CPM
+          Evolução Militar • Fornecedor Oficial 7º CPM União da Vitória
         </p>
       </div>
 
@@ -1439,15 +1471,13 @@
       <!-- Topo do Modal -->
       <div class="flex items-center justify-between border-b border-[#2a382c] pb-3">
         <div class="flex items-center gap-2.5">
-          <div class="w-10 h-10 rounded-xl bg-[#203023] border border-[#3c5540] flex items-center justify-center text-2xl shadow-sm flex-shrink-0">
-            📱
-          </div>
+          <img src="brasao_cpm.png" alt="7º CPM" class="w-11 h-11 object-contain rounded-full border border-amber-400/50 shadow-sm flex-shrink-0">
           <div>
             <h3 class="text-sm sm:text-base font-black text-white uppercase tracking-wider">
               BAIXAR / INSTALAR APLICATIVO
             </h3>
             <p class="text-xs text-lime-400 font-mono">
-              Evolução Militar • Bordados CPM
+              Evolução Militar • 7º Colégio da Polícia Militar
             </p>
           </div>
         </div>
@@ -2122,6 +2152,7 @@ Aguardamos você para a retirada! Muito obrigado pela preferência.`;
         </head>
         <body onload="window.print()">
           <h2>EVOLUÇÃO MILITAR</h2>
+          <p style="text-align: center; margin: 2px 0; font-size: 11px; font-weight: bold;">7º COLÉGIO DA POLÍCIA MILITAR • UNIÃO DA VITÓRIA</p>
           <h3>ORDEM DE CONFECÇÃO DE BORDADO</h3>
           <hr/>
           <p><strong>PEDIDO:</strong> ${order.id}</p>
